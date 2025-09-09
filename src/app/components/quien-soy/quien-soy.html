@@ -1,0 +1,53 @@
+<div class="quien-soy-container">
+    @if (isLoading) {
+        <div class="loading">Cargando...</div>
+    }
+    @if (error) {
+        <div class="error">
+            Error al cargar los datos. Intenta nuevamente.
+        </div>
+    }
+    
+    @if (userData) {
+        <div class="profile-container">
+            <div class="profile-header">
+                <img [src]="userData.avatar_url" alt="Avatar" class="avatar">
+                <h1 class="neon-text">{{ userData.name || userData.login }}</h1>
+                <p class="bio">{{ userData.bio || 'Sin biografía' }}</p>
+            </div>
+
+            <div class="profile-details">
+                <div class="detail-item">
+                    <h3> Usuario</h3>
+                    <p>{{ userData.login }}</p>
+                </div>
+                <div class="detail-item">
+                    <h3> Ubicación</h3>
+                    <p>{{ userData.location || 'No especificada' }}</p>
+                </div>
+                <div class="detail-item">
+                    <h3>Repositorios</h3>
+                    <p>{{ userData.public_repos }}</p>
+                </div>
+                <div class="detail-item">
+                    <h3> Seguidores</h3>
+                    <p>{{ userData.followers }}</p>
+                </div>
+            </div>
+
+            <div class="game-explanation">
+                <h2 class="neon-text"> Mi Juego: "Adivina el Número"</h2>
+                <p><strong>¿Por qué elegí este juego?</strong> Porque es simple pero divertido, perfecto para practicar lógica de programación y interacción con el usuario.</p>
+                
+                <h3>¿Cómo jugar?</h3>
+                <ol>
+                    <li>La computadora elige un número aleatorio entre 1 y 100</li>
+                    <li>Tienes que adivinar el número en la menor cantidad de intentos</li>
+                    <li>Después de cada intento, te diré si el número es mayor o menor</li>
+                    <li>¡Ganas cuando adivines el número correcto!</li>
+                </ol>
+            </div>
+        </div>
+    }
+    
+</div>
