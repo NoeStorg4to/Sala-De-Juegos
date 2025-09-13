@@ -11,6 +11,7 @@ export const routes: Routes = [
     { path: 'registro', component: Registro },
     { path: 'home', component: Home },
     { path: 'quien-soy', component: QuienSoy },
+    // ------------ RUTAS DE JUEGOS ACA ------------------
     { path: '**', redirectTo: '/home' }
 ];
 
