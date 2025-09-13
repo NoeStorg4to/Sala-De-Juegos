@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
@@ -9,7 +10,10 @@ import { CommonModule } from '@angular/common';
   styleUrl: './navbar.css'
 })
 export class Navbar {
-  logClick(linkName: string) {
-    console.log('Click en:', linkName);
+  constructor(private router: Router) {}
+
+  navigateTo(route: string) {
+    console.log('Navegando a:', route);
+    this.router.navigate([route]);
   }
 }
