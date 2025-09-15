@@ -3,72 +3,121 @@
         <h2>Registrarse</h2>
         
         @if (!isLoading){
-            <form (ngSubmit)="onSubmit()">
+            <form (ngSubmit)="onSubmit()" #registroForm="ngForm">
                 <div class="form-group">
-                    <label for="email">Email:</label>
+                    <label for="email">Email *</label>
                     <input 
                     type="email" 
                     id="email" 
                     [(ngModel)]="userData.email" 
-                    name="email" 
+                    name="userData.email" 
                     required 
                     placeholder="Tu email"
+                    class="form-control"
+                    [class.error]="fieldErrors.email"
+                    (input)="onEmailChange()"
+                    #emailField="ngModel"
                     >
+                    @if (fieldErrors.email) {
+                        <div class="field-error">{{ fieldErrors.email }}</div>
+                    }
                 </div>
             
                 <div class="form-group">
-                    <label for="name">Nombre:</label>
+                    <label for="name">Nombre *</label>
                     <input 
                     type="text" 
                     id="name" 
                     [(ngModel)]="userData.name" 
-                    name="name" 
+                    name="userData.name" 
                     required 
+                    minlength="2"
                     placeholder="Tu nombre"
+                    class="form-control"
+                    [class.error]="fieldErrors.name"
+                    (input)="onNameChange()"
+                    #nameField="ngModel"
                     >
+                    @if (fieldErrors.name) {
+                        <div class="field-error">{{ fieldErrors.name }}</div>
+                    }
                 </div>
-            
+
                 <div class="form-group">
-                    <label for="lastname">Apellido:</label>
+                    <label for="lastname">Apellido *</label>
                     <input 
                     type="text" 
                     id="lastname" 
                     [(ngModel)]="userData.lastname" 
-                    name="lastname" 
+                    name="userData.lastname" 
                     required 
+                    minlength="2"
                     placeholder="Tu apellido"
+                    class="form-control"
+                    [class.error]="fieldErrors.lastname"
+                    (input)="onLastnameChange()"
+                    #lastnameField="ngModel"
                     >
+                    @if (fieldErrors.lastname) {
+                        <div class="field-error">{{ fieldErrors.lastname }}</div>
+                    }
                 </div>
             
                 <div class="form-group">
-                    <label for="age">Edad:</label>
+                    <label for="age">Edad *</label>
                     <input 
                     type="number" 
                     id="age" 
                     [(ngModel)]="userData.age" 
-                    name="age" 
+                    name="userData.age" 
                     required 
                     min="1"
                     max="120"
+                    min="13"
+                    max="120"
                     placeholder="Tu edad"
+                    class="form-control"
+                    [class.error]="fieldErrors.age"
+                    (input)="onAgeChange()"
+                    #ageField="ngModel"
                     >
+                    @if (fieldErrors.age) {
+                        <div class="field-error">{{ fieldErrors.age }}</div>
+                    }
                 </div>
+                @if (getUsernamePreview()) {
+                    <div class="username-preview">
+                        <small>
+                            <strong>Tu nombre de usuario será:</strong> {{ getUsernamePreview() }}
+                        </small>
+                    </div>
+                }
             
                 <div class="form-group">
-                    <label for="password">Contraseña:</label>
+                    <label for="password">Contraseña *</label>
                     <input 
                     type="password" 
                     id="password" 
                     [(ngModel)]="userData.password" 
-                    name="password" 
+                    name="userData.password" 
                     required 
                     minlength="6"
                     placeholder="Mínimo 6 caracteres"
+                    class="form-control"
+                    [class.error]="fieldErrors.password"
+                    (input)="onPasswordChange()"
+                    #passwordField="ngModel"
                     >
+                    @if (fieldErrors.password) {
+                        <div class="field-error">{{ fieldErrors.password }}</div>
+                    }
+                    <div class="password-hint">
+                        <small>La contraseña debe tener al menos una letra y un número</small>
+                    </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="confirmPassword">Confirmar Contraseña:</label>
+                    <label for="confirmPassword">Confirmar Contraseña *</label>
                     <input 
                     type="password" 
                     id="confirmPassword" 
@@ -76,17 +125,30 @@
                     name="confirmPassword" 
                     required 
                     placeholder="Repite tu contraseña"
+                    class="form-control"
+                    [class.error]="fieldErrors.confirmPassword"
+                    (input)="onConfirmPasswordChange()"
+                    #confirmPasswordField="ngModel"
                     >
+                    @if (fieldErrors.confirmPassword) {
+                        <div class="field-error">{{ fieldErrors.confirmPassword }}</div>
+                    }
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Registrarse</button>
+                <button type="submit" class="btn btn-primary" >Registrarse</button> 
+                <!-- [disabled]="isLoading || registroForm.invalid" -->
             </form>
         } @else {
-            <div class="loading">Creando tu cuenta...</div>
+            <!-- <div class="loading">Creando tu cuenta...</div> -->
+            <div class="loading">
+                <div class="spinner"></div>
+                <span>Creando tu cuenta...</span>
+            </div>
         }
 
         @if (errorMessage) {
             <div class="error-message">
+                <i class="error-icon">⚠</i>
                 {{ errorMessage }}
             </div>
         }
@@ -94,5 +156,6 @@
         <div class="login-link">
             <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión aquí</a></p>
         </div>
+        <!-- PONER ALGUNA POLITICA DE SEGURIDA Y TERMINOS??? -->
     </div>
 </div>
