@@ -2,16 +2,17 @@
     <div class="nav-container">
         <a routerLink="/home" class="nav-logo">🎮 NoliGames</a>
         <div class="nav-menu">
-            <!-- <a routerLink="/home" class="nav-link">Home</a>
-            <a routerLink="/quien-soy" class="nav-link">Quién Soy</a>
-            <a routerLink="/login" class="nav-link">Login</a>
-            <a routerLink="/registro" class="nav-link">Registro</a> -->
-
             <nav>
                 <button class="nav-button" (click)="navigateTo('/home')">Home</button>
                 <button class="nav-button" (click)="navigateTo('/quien-soy')">Quién Soy</button>
-                <button class="nav-button" (click)="navigateTo('/login')">Login</button>
-                <button class="nav-button" (click)="navigateTo('/registro')">Registro</button>
+
+                @if (!authService.isAuthenticated()) {
+                    <button class="nav-button" (click)="navigateTo('/login')">Login</button>
+                    <button class="nav-button" (click)="navigateTo('/registro')">Registro</button>
+                }
+                @if (authService.isAuthenticated()) {
+                    <button class="nav-button" (click)="authService.logout()">Logout</button>
+                }
             </nav>
         </div>
     </div>

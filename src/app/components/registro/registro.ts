@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FormErrors, UserRegistrationData, ValidateService } from '../../services/validate.service';
+import { Subject, takeUntil } from 'rxjs';
 
 
 @Component({
@@ -12,8 +14,9 @@ import { CommonModule } from '@angular/common';
   templateUrl: './registro.html',
   styleUrl: './registro.css'
 })
-export class Registro {
-  userData = {
+
+export class Registro implements OnDestroy{
+  userData: UserRegistrationData = {
     email: '',
     password: '',
     name: '',
@@ -24,34 +27,41 @@ export class Registro {
   errorMessage: string = '';
   successMessage: string = '';
   isLoading: boolean = false;
+  fieldErrors!: FormErrors; // MUESTRO ERRORES ESPECIFICOS POR CAMPO
 
-  // MUESTRO ERRORES ESPECIFICOS POR CAMPO
-  fieldErrors = {
-    email: '',
-    password: '',
-    confirmPassword: '',
-    name: '',
-    lastname: '',
-    age: ''
-  };
+  // DESUSCRIPCION AUTOMATICA PARA EVITAR FUGAS DE MEMORIA (MEMORY LEAKS) -  VA A DESTRUIR EL COMPONENTE SI SE CIERRA LA PAG
+  private destroy$ = new Subject<void>();
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router, private validateService: ValidateService) {
+    this.fieldErrors = this.validateService.clearFormErrors();
+    this.authService.authState$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(authState => {
+        if (authState.isAuthenticated && this.isLoading) {
+          console.log('Usuario autenticado, redirigiendo...');
+          this.handleSuccessfulRegistration();
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next(); // Avisa a todas las suscripciones
+    this.destroy$.complete(); // NO OLVIDAR -  limpia recursos y complet el subjeCt
+  }
 
   async onSubmit() {
     console.log('onSubmit() SE ESTÁ EJECUTANDO');
     this.clearMessages()
 
     if (!this.validateForm()) {
-      console.log('2. Validación falló');
+      console.log('Validación falló');
       return;
     }
-    console.log('3. Validación OK, iniciando registro');
+    console.log('Validación OK, iniciando registro');
     this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
     
     try {
-      console.log('4. Llamando authService.register');
+      console.log('Llamando authService.register');
       const result = await this.authService.register(
         this.userData.email, 
         this.userData.password, 
@@ -61,211 +71,131 @@ export class Registro {
           age: this.userData.age
         }
       );
-      console.log('5. Resultado del register:', result);
+      console.log(' Resultado del register:', result);
 
       if (result.error) {
-        console.log('6. Hay error:', result.error);
-        this.handleError(result.error);
+        console.log('Hay error en el registro:', result.error);
+        this.errorMessage = this.validateService.mapSupabaseError(result.error);
       } else {
-        console.log('7. Registro exitoso, mostrando mensaje');
+        console.log('Registro exitoso, mostrando mensaje');
         this.successMessage = '¡Registro exitoso! Revisa tu email para confirmar.';
-
-        console.log('8. Verificando autenticación');
-
-        setTimeout(() => {
-          console.log('9. Ejecutando redirección...');
-          this.router.navigate(['/home']);
-          console.log('click en registrar-- Redirigiendo a home')
-        }, 2000);
       }
     } catch (error) {
-      console.error('10. Error catch:', error);
+      console.error('Error inesperado:', error);
       this.errorMessage = 'Error inesperado. Por favor, intenta nuevamente.';
     } finally {
-      console.log('11. Finalizando, isLoading = false');
+      console.log('Finalizando, isLoading = false');
       this.isLoading = false;
     }
-    
-    
   }
 
-  // ########### OPTIMIZAR EN UN ARCHIVO VALIDACIONES.TS ###############
   private validateForm(): boolean {
-    let isValid = true;
+    const validation = this.validateService.validateRegistrationForm(
+      this.userData,
+      this.confirmPassword
+    );
 
-    // Validar email
-    if (!this.userData.email) {
-      this.fieldErrors.email = 'El email es requerido';
-      isValid = false;
-    } else if (!this.isValidEmail(this.userData.email)) {
-      this.fieldErrors.email = 'Ingresa un email válido';
-      isValid = false;
-    }
-
-    // Validar contraseña
-    if (!this.userData.password) {
-      this.fieldErrors.password = 'La contraseña es requerida';
-      isValid = false;
-    } else if (this.userData.password.length < 6) {
-      this.fieldErrors.password = 'La contraseña debe tener al menos 6 caracteres';
-      isValid = false;
-    } else if (!this.isStrongPassword(this.userData.password)) {
-      this.fieldErrors.password = 'La contraseña debe tener al menos una letra y un número';
-      isValid = false;
-    }
-
-    // Validar confirmación de contraseña
-    if (!this.confirmPassword) {
-      this.fieldErrors.confirmPassword = 'Confirma tu contraseña';
-      isValid = false;
-    } else if (this.userData.password !== this.confirmPassword) {
-      this.fieldErrors.confirmPassword = 'Las contraseñas no coinciden';
-      this.errorMessage = 'Las contraseñas no coinciden';
-      isValid = false;
-    }
-
-    // Validar nombre
-    if (!this.userData.name) {
-      this.fieldErrors.name = 'El nombre es requerido';
-      isValid = false;
-    } else if (this.userData.name.trim().length < 2) {
-      this.fieldErrors.name = 'El nombre debe tener al menos 2 caracteres';
-      isValid = false;
-    } else if (!this.isValidName(this.userData.name)) {
-      this.fieldErrors.name = 'El nombre solo debe contener letras y espacios';
-      isValid = false;
-    }
-
-    // Validar apellido
-    if (!this.userData.lastname) {
-      this.fieldErrors.lastname = 'El apellido es requerido';
-      isValid = false;
-    } else if (this.userData.lastname.trim().length < 2) {
-      this.fieldErrors.lastname = 'El apellido debe tener al menos 2 caracteres';
-      isValid = false;
-    } else if (!this.isValidName(this.userData.lastname)) {
-      this.fieldErrors.lastname = 'El apellido solo debe contener letras y espacios';
-      isValid = false;
-    }
-
-    // Validar edad
-    if (!this.userData.age) {
-      this.fieldErrors.age = 'La edad es requerida';
-      isValid = false;
-    } else if (this.userData.age < 13) {
-      this.fieldErrors.age = 'Debes tener al menos 13 años para registrarte';
-      isValid = false;
-    } else if (this.userData.age > 120) {
-      this.fieldErrors.age = 'Ingresa una edad válida';
-      isValid = false;
-    }
-
-    // Mostrar mensaje general si hay errores
-    if (!isValid) {
+    if (!validation.isValid) {
+      this.fieldErrors = validation.errors;
       this.errorMessage = 'Por favor, corrige los errores en el formulario';
+      return false;
     }
-
-    return isValid;
+    return true;
   }
 
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email.trim());
+  // MANEJADOR DE REGISTRO EXITOSO
+  private handleSuccessfulRegistration(): void {
+    setTimeout(() => {
+      console.log('Redirigiendo a home tras registro exitoso...');
+      this.router.navigate(['/home']);
+    }, 1500);
   }
 
-  private isStrongPassword(password: string): boolean {
-    // Al menos una letra y un número
-    const hasLetter = /[a-zA-Z]/.test(password);
-    const hasNumber = /\d/.test(password);
-    return hasLetter && hasNumber;
-  }
-
-  private isValidName(name: string): boolean {
-    // Solo letras, espacios, acentos y ñ
-    const nameRegex = /^[a-zA-ZÀ-ÿñÑ\s]+$/;
-    return nameRegex.test(name.trim());
-  }
-  // ###########################################################
-
-  // ################ OPTIMIZAR
-  handleError(error: any) {
-    if (error.message.includes('already registered')) {
-      this.errorMessage = 'Este email ya está registrado. Por favor, inicia sesión.';
-    } else if (error.message.includes('Password should be at least')) {
-      this.errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
-    } else if (error.message.includes('Invalid email')) {
-      this.errorMessage = 'Por favor, ingresa un email válido.';
-    } else {
-      this.errorMessage = 'Error al registrar. Por favor, intenta nuevamente.';
-    }
-  }
-
-  clearMessages() {
+  private clearMessages(): void {
     this.errorMessage = '';
     this.successMessage = '';
-    this.fieldErrors = {
-      email: '',
-      password: '',
-      confirmPassword: '',
-      name: '',
-      lastname: '',
-      age: ''
-    };
+    this.fieldErrors = this.validateService.clearFormErrors();
   }
 
-  clearFieldError(field: keyof typeof this.fieldErrors) {
+  clearFieldError(field: keyof FormErrors): void {
     this.fieldErrors[field] = '';
-    if (Object.values(this.fieldErrors).every(error => !error)) {
+    if (Object.values(this.fieldErrors).every(error => !error)) { //Limpia mensaje general si no hay errores de campo
       this.errorMessage = '';
     }
   }
 
   // ----------- VALIDACIONES EN TIEMPO REAL PARA QUE LO  VISUALICE EL USUARIO
   getUsernamePreview(): string {
-    if (this.userData.name && this.userData.lastname) {
-      return `${this.userData.name}${this.userData.lastname}`
-        .toLowerCase()
-        .replace(/\s+/g, '')
-        .replace(/[àáäâ]/g, 'a')
-        .replace(/[èéëê]/g, 'e')
-        .replace(/[ìíïî]/g, 'i')
-        .replace(/[òóöô]/g, 'o')
-        .replace(/[ùúüû]/g, 'u')
-        .replace(/ñ/g, 'n');
-    }
-    return '';
+    return this.validateService.generateUsername(
+      this.userData.name,
+      this.userData.lastname
+    );
   }
 
   onEmailChange() {
     this.clearFieldError('email');
+    if (this.userData.email) {
+      const validation = this.validateService.validateEmail(this.userData.email);
+      if (!validation.isValid) {
+        this.fieldErrors['email'] = validation.message;
+      }
+    }
   }
 
   onPasswordChange() {
     this.clearFieldError('password');
-    // Si ya hay confirmPassword, validar que coincidan
-    if (this.confirmPassword && this.userData.password !== this.confirmPassword) {
-      this.fieldErrors.confirmPassword = 'Las contraseñas no coinciden';
-    } else {
-      this.clearFieldError('confirmPassword');
+
+    if (this.userData.password) {
+      const validation = this.validateService.validatePassword(this.userData.password);
+      if (!validation.isValid) {
+        this.fieldErrors['password'] = validation.message;
+      }
     }
   }
 
-  onConfirmPasswordChange() {
+  onConfirmPasswordChange(): void {
     this.clearFieldError('confirmPassword');
-    if (this.userData.password !== this.confirmPassword) {
-      this.fieldErrors.confirmPassword = 'Las contraseñas no coinciden';
-    }
+    this.validatePasswordConfirmation();
   }
 
   onNameChange() {
     this.clearFieldError('name');
+    if (this.userData.name) {
+      const validation = this.validateService.validateName(this.userData.name, 'nombre');
+      if (!validation.isValid) {
+        this.fieldErrors['name'] = validation.message;
+      }
+    }
   }
 
   onLastnameChange() {
     this.clearFieldError('lastname');
+    if (this.userData.lastname) {
+      const validation = this.validateService.validateName(this.userData.lastname, 'apellido');
+      if (!validation.isValid) {
+        this.fieldErrors['lastname'] = validation.message;
+      }
+    }
   }
 
   onAgeChange() {
     this.clearFieldError('age');
+    if (this.userData.age) {
+      const validation = this.validateService.validateAge(this.userData.age);
+      if (!validation.isValid) {
+        this.fieldErrors['age'] = validation.message;
+      }
+    }
+  }
+
+  private validatePasswordConfirmation(): void {
+    const validation = this.validateService.validatePasswordConfirmation(
+      this.userData.password,
+      this.confirmPassword
+    );
+    
+    if (!validation.isValid) {
+      this.fieldErrors['confirmPassword'] = validation.message;
+    }
   }
 }

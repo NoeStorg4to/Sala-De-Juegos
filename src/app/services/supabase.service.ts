@@ -2,16 +2,8 @@ import { Injectable } from "@angular/core";
 import { environment } from "../../enviroments/enviroment";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Router } from "@angular/router";
+import { ValidateService } from "./validate.service";
 
-// export interface AuthLog {
-//     user_id: string;
-//     action_type: 'login' | 'logout' | 'register';
-//     timestamp: string;
-//     ip_address?: string;
-//     user_agent?: string;
-//     success: boolean;
-//     error_message?: string;
-// }
 
 export interface UserProfile {
     id: string;
@@ -23,14 +15,26 @@ export interface UserProfile {
     created_at: string;
 }
 
+export interface GameScore {
+    id?: string;
+    user_id: string;
+    game_name: string;
+    score: number;
+    level: number;
+    play_date: string;
+    created_at: string;
+    updated_at: string;
+}
+
 @Injectable({
     providedIn: 'root'
 })
 
 export class SupabaseService {
     private supabase: SupabaseClient;
+    
 
-    constructor(private router: Router) {
+    constructor(private router: Router, private validationService: ValidateService) {
         this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
         auth: {
             persistSession: false,  
@@ -56,7 +60,7 @@ export class SupabaseService {
     }
 
 
-    async signIn(email: string, password: string) {
+    async signIn(email: string, password: string): Promise<{ data: any; error: any }>{
         
         try {
             const { data, error} = await this.supabase.auth.signInWithPassword({
@@ -66,7 +70,7 @@ export class SupabaseService {
 
             if (error) {
                 console.error('Login failed:', error.message);
-                throw error;
+                return { data: null, error };
             }
             console.log('Login successful for:', data.user?.email);
             this.router.navigate(['/home']);
@@ -77,7 +81,8 @@ export class SupabaseService {
         }
     }
 
-    async signUp(email: string, password: string, userData: any) {
+    // REGISTRO DE NUEVO USUARIO Y CREA EL PERFIL
+    async signUp(email: string, password: string, userData: { name: string; lastname: string; age: number }): Promise<{ data: any; error: any }> {
         try {
             console.log('Registrando usuario en Auth...');
             const { data: authData, error: authError } = await this.supabase.auth.signUp({ 
@@ -87,57 +92,28 @@ export class SupabaseService {
 
             if (authError) {
                 console.error('Error en auth:', authError);
-                throw authError;
-            }
-// ################ OPTIMIZAR #################33
-            if (authData.user) {
-                const profileData: Omit<UserProfile, 'id'> & { id: string } = {
-                    id: authData.user.id,
-                    username: `${userData.name}${userData.lastname}`.toLowerCase().replace(/\s+/g, ''),
-                    name: userData.name,
-                    lastname: userData.lastname,
-                    age: userData.age,
-                    score: 0,
-                    created_at: new Date().toISOString()
-                };
-                const { error: profileError } = await this.supabase
-                    .from('profiles')
-                    .insert(profileData);
-
-                if (profileError) {
-                    console.error('Error creating profile:', profileError);
-                    console.warn('Usuario creado en auth pero falló creación de perfil. Considera limpiar auth.');
-                    throw profileError;
-                }
-                
+                return { data: null, error: authError };
             }
 
+            if (!authData.user) {
+                const error = new Error('No se pudo crear el usuario');
+                return { data: null, error };
+            }
+
+            await this.createUserProfile(authData.user.id, userData);
             console.log(' Perfil creado exitosamente');
 
-            const { error: signInError } = await this.supabase.auth.signInWithPassword({
-                    email,
-                    password
-                });
-                
-            // if (authData.user) {
-            //     const { error: signInError } = await this.supabase.auth.signInWithPassword({
-            //         email,
-            //         password
-            //     });
+            const loginResult = await this.signIn(email, password);
 
-            if (!signInError) {
-                console.warn('Registro exitoso pero auto-login falló:', signInError);
-                this.router.navigate(['/home']);
+            if (loginResult.error) {
+                console.warn('Registro exitoso pero auto-login falló:', loginResult.error);
             } else {
                 console.log('✅ Auto-login exitoso');
             }
-            return { data: authData, error: null };
-            // }
 
-            
-        } catch(error: any) {
+            return { data: authData, error: null };
+        } catch (error: any) {
             console.error('Error en registro:', error);
-            // Verificar si es error de usuario ya registrado
             if (error.message?.includes('already registered')) {
                 error.message = 'El usuario ya se encuentra registrado';
             }
@@ -145,13 +121,37 @@ export class SupabaseService {
         }
     }
 
-    async signOut() {
+    private async createUserProfile(userId: string, userData: { name: string; lastname: string; age: number }
+    ): Promise<void> {
+        const profileData: Omit<UserProfile, 'id'> & { id: string } = {
+            id: userId,
+            username: this.validationService.generateUsername(userData.name, userData.lastname),
+            name: userData.name,
+            lastname: userData.lastname,
+            age: userData.age,
+            score: 0,
+            created_at: new Date().toISOString()
+        };
+
+        const { error: profileError } = await this.supabase
+            .from('profiles')
+            .insert(profileData);
+
+        if (profileError) {
+            console.error('Error creating profile:', profileError);
+            console.warn('Usuario creado en auth pero falló creación de perfil. Considera limpiar auth.');
+            throw profileError;
+        }
+    }
+
+    async signOut(): Promise<{ error: any }>{
         const result = await this.supabase.auth.signOut();
         this.router.navigate(['/home']);
         return result;
     }
 
-    async getUserProfile(userId: string) {
+    // OBTIENE EL PERFIL DE USUARIO POR ID
+    async getUserProfile(userId: string): Promise<UserProfile>{
         try {
             const { data, error } = await this.supabase
                 .from('profiles')
@@ -167,31 +167,71 @@ export class SupabaseService {
         }
     }
 
-    // ############# AGREGAR METODO PARA ACTUALIZAR EL USUARIO??
-
-    // -------------PARA GUARDAR PUNTUACION---????????
-    async saveGameScore(gameName: string, score: number, level: number = 1) {
+    // ACTUALIZA EL PERFIL DEL USUARIO
+    async updateUserProfile(userId: string, updates: Partial<Omit<UserProfile, 'id' | 'created_at'>>): Promise<UserProfile> {
         try {
-            const user = (await this.user).data.user;
-            if (!user) throw new Error('Usuario no autenticado');
+            const { data, error } = await this.supabase
+                .from('profiles')
+                .update(updates)
+                .eq('id', userId)
+                .select()
+                .single(); //--> con esto devuelvo un objeto directamente. Y me asegura un resultado
+
+            if (error) throw error;
+            return data as UserProfile;
+        } catch (error) {
+            console.error('Error actualizando perfil:', error);
+            throw error;
+        }
+    }
+
+    // PARA GUARDAR PUNTUACION
+    async saveGameScore(gameName: string, score: number, level: number = 1): Promise<GameScore>{
+        try {
+            const { data: { user } } = await this.user;
+            
+            if (!user) {
+                throw new Error('Usuario no autenticado');
+            }
+
+            const gameScoreData: Omit<GameScore, 'id'> = {
+                user_id: user.id,
+                game_name: gameName,
+                score,
+                level,
+                play_date: new Date().toISOString(),
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
 
             const { data, error } = await this.supabase
                 .from('game_scores')
-                .insert({
-                    user_id: user.id,
-                    game_name: gameName,
-                    score: score,
-                    level: level,
-                    play_date: new Date().toISOString(),
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                })
-                .select();
+                .insert(gameScoreData)
+                .select()
+                .single();
 
             if (error) throw error;
-            return data;
+            return data as GameScore;
         } catch (error) {
             console.error('Error guardando puntuación:', error);
+            throw error;
+        }
+    }
+
+    // MEJORES PUNTUACIONES
+    async getUserHighScores(userId: string, limit: number = 10): Promise<GameScore[]> {
+        try {
+            const { data, error } = await this.supabase
+                .from('game_scores')
+                .select('*')
+                .eq('user_id', userId)
+                .order('score', { ascending: false })
+                .limit(limit);
+
+            if (error) throw error;
+            return data as GameScore[];
+        } catch (error) {
+            console.error('Error obteniendo puntuaciones:', error);
             throw error;
         }
     }

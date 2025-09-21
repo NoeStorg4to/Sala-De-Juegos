@@ -14,12 +14,12 @@
                     required 
                     placeholder="Tu email"
                     class="form-control"
-                    [class.error]="fieldErrors.email"
+                    [class.error]="fieldErrors['email']"
                     (input)="onEmailChange()"
                     #emailField="ngModel"
                     >
-                    @if (fieldErrors.email) {
-                        <div class="field-error">{{ fieldErrors.email }}</div>
+                    @if (fieldErrors['email']) {
+                        <div class="field-error">{{ fieldErrors['email'] }}</div>
                     }
                 </div>
             
@@ -34,12 +34,12 @@
                     minlength="2"
                     placeholder="Tu nombre"
                     class="form-control"
-                    [class.error]="fieldErrors.name"
+                    [class.error]="fieldErrors['name']"
                     (input)="onNameChange()"
                     #nameField="ngModel"
                     >
-                    @if (fieldErrors.name) {
-                        <div class="field-error">{{ fieldErrors.name }}</div>
+                    @if (fieldErrors['name']) {
+                        <div class="field-error">{{ fieldErrors['name'] }}</div>
                     }
                 </div>
 
@@ -54,12 +54,12 @@
                     minlength="2"
                     placeholder="Tu apellido"
                     class="form-control"
-                    [class.error]="fieldErrors.lastname"
+                    [class.error]="fieldErrors['lastname'] "
                     (input)="onLastnameChange()"
                     #lastnameField="ngModel"
                     >
-                    @if (fieldErrors.lastname) {
-                        <div class="field-error">{{ fieldErrors.lastname }}</div>
+                    @if (fieldErrors['lastname']) {
+                        <div class="field-error">{{ fieldErrors['lastname'] }}</div>
                     }
                 </div>
             
@@ -77,12 +77,12 @@
                     max="120"
                     placeholder="Tu edad"
                     class="form-control"
-                    [class.error]="fieldErrors.age"
+                    [class.error]="fieldErrors['age']"
                     (input)="onAgeChange()"
                     #ageField="ngModel"
                     >
-                    @if (fieldErrors.age) {
-                        <div class="field-error">{{ fieldErrors.age }}</div>
+                    @if (fieldErrors['age']) {
+                        <div class="field-error">{{ fieldErrors['age'] }}</div>
                     }
                 </div>
                 @if (getUsernamePreview()) {
@@ -104,12 +104,12 @@
                     minlength="6"
                     placeholder="Mínimo 6 caracteres"
                     class="form-control"
-                    [class.error]="fieldErrors.password"
+                    [class.error]="fieldErrors['password']"
                     (input)="onPasswordChange()"
                     #passwordField="ngModel"
                     >
-                    @if (fieldErrors.password) {
-                        <div class="field-error">{{ fieldErrors.password }}</div>
+                    @if (fieldErrors['password']) {
+                        <div class="field-error">{{ fieldErrors['password'] }}</div>
                     }
                     <div class="password-hint">
                         <small>La contraseña debe tener al menos una letra y un número</small>
@@ -126,12 +126,12 @@
                     required 
                     placeholder="Repite tu contraseña"
                     class="form-control"
-                    [class.error]="fieldErrors.confirmPassword"
+                    [class.error]="fieldErrors['confirmPassword'] "
                     (input)="onConfirmPasswordChange()"
                     #confirmPasswordField="ngModel"
                     >
-                    @if (fieldErrors.confirmPassword) {
-                        <div class="field-error">{{ fieldErrors.confirmPassword }}</div>
+                    @if (fieldErrors['confirmPassword']) {
+                        <div class="field-error">{{ fieldErrors['confirmPassword'] }}</div>
                     }
                 </div>
                 

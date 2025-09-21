@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -10,10 +11,14 @@ import { Router } from '@angular/router';
   styleUrl: './navbar.css'
 })
 export class Navbar {
-  constructor(private router: Router) {}
+  constructor(private router: Router, public authService: AuthService) {}
 
   navigateTo(route: string) {
     console.log('Navegando a:', route);
     this.router.navigate([route]);
+  }
+
+  logout () {
+    this.authService.logout();
   }
 }

@@ -16,9 +16,9 @@ export class Home implements OnInit{
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    this.authService.currentUser.subscribe(user => {
-      this.isLoggedIn = !!user;
-      this.userName = user?.user_metadata?.name || user?.email || null;
+    this.authService.authState$.subscribe(authState => {
+      this.isLoggedIn = authState.isAuthenticated;
+      this.userName = authState.profile?.name || authState.user?.email || null;
     });
   }
 
