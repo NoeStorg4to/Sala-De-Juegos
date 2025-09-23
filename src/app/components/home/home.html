@@ -13,7 +13,7 @@
                     <p>¡Adivina la palabra antes de que se complete el ahorcado!</p>
             </div>
         
-            <div class="game-card" (click)="navigateTo('/juego-mayor-menor')">
+            <div class="game-card" (click)="navigateTo('/mayorMenor')">
                 <h3>Mayor o Menor</h3>
                 <p>¿La próxima carta será mayor o menor?</p>
             </div>
@@ -27,6 +27,14 @@
                 <h3>Mi Juego</h3>
                 <p>Disfruta del juego creado especialmente para ti</p>
             </div>
+        </div>
+
+        <div class="chat-floating-container">
+            <button class="btn-gamer btn-chat-floating" (click)="navigateTo('/chat')">
+                <span class="chat-icon">💬</span>
+                <span class="chat-text">Chat Global</span>
+                <div class="chat-pulse"></div>
+            </button>
         </div>
     </div>
 </div>

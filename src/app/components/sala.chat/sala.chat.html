@@ -1,0 +1,59 @@
+<div class="chat-container">
+    <div class="chat-header">
+        <h2>💬 Sala de Chat Global</h2>
+        <p>Conectado como: <strong>{{ getCurrentUsername() }}</strong></p>
+    </div>
+
+    @if (error) {
+        <div class="error-message">
+            {{ error }}
+        </div>
+    }
+    
+    @if (isLoading) {
+        <div class="loading">
+            <p>Cargando mensajes...</p>
+        </div>
+    }
+    
+    <div class="messages-container" #messagesContainer>
+
+        <div *ngFor="let message of messages$ | async; trackBy: trackByMessageId" 
+            class="message" 
+            [ngClass]="{'own-message': isOwnMessage(message), 'other-message': !isOwnMessage(message)}">
+        
+        <div class="message-header">
+            <span class="username">{{ message.username }}</span>
+            <span class="timestamp">{{ formatTime(message.created_at) }}</span>
+        </div>
+        
+        <div class="message-content">
+            {{ message.message }}
+        </div>
+        </div>
+    </div>
+
+    <div class="message-input-container">
+        <div class="input-group">
+        <input 
+            type="text" 
+            [(ngModel)]="newMessage" 
+            (keypress)="onKeyPress($event)"
+            placeholder="Escribe tu mensaje..."
+            class="message-input"
+            maxlength="500"
+            [disabled]="isLoading">
+        
+        <button 
+            (click)="sendMessage()" 
+            [disabled]="!newMessage.trim() || isLoading"
+            class="send-button">
+            📩 Enviar
+        </button>
+        </div>
+        
+        <div class="input-hint">
+        Presiona Enter para enviar • {{ newMessage.length }}/500
+        </div>
+    </div>
+</div>

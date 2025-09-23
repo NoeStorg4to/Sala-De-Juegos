@@ -1,0 +1,166 @@
+<div class="higher-lower-container">
+    <header class="game-header">
+        <h1> Mayor o Menor</h1>
+        <button class="btn btn-secondary" (click)="goHome()">← Volver al Home</button>
+    </header>
+
+    <div class="game-info">
+        <div class="info-item">
+            <span class="label">Cartas acertadas:</span>
+            <span class="value success">{{ currentStreak }}</span>
+        </div>
+        <div class="info-item">
+            <span class="label">Mejor racha:</span>
+            <span class="value">{{ maxScore }}</span>
+        </div>
+        <div class="info-item">
+            <span class="label">Total cartas:</span>
+            <span class="value">{{ totalCards }}</span>
+        </div>
+    </div>
+
+    @if (!gameEnded) {
+        <div class="game-area">
+            <div class="card-section">
+                <h2>Carta Actual:</h2>
+                <div class="card" [class]="getCardColor(game.currentCard.suit)">
+                    <div class="card-header">
+                        <span class="card-value">{{ game.currentCard.name }}</span>
+                        <span class="card-suit">{{ getCardSymbol(game.currentCard.suit) }}</span>
+                    </div>
+                    <div class="card-center">
+                        <span class="large-suit">{{ getCardSymbol(game.currentCard.suit) }}</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-value flipped">{{ game.currentCard.name }}</span>
+                        <span class="card-suit flipped">{{ getCardSymbol(game.currentCard.suit) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="versus">
+                <span>VS</span>
+            </div>
+
+            <div class="card-section">
+                <h2>Próxima Carta:</h2>
+
+                @if (!showFeedback) {
+                    <div class="card" [class.hidden-card]="true">
+                        <div class="card-back">
+                            <div class="card-back-pattern">🎴</div>
+                        </div>
+                    </div>
+                }
+                @if (showFeedback && hasNextCard) {
+                    <div class="card" [class]="getCardColor(game.nextCard!.suit)">
+                        <div class="card-header">
+                            <span class="card-value">{{ game.nextCard!.name }}</span>
+                            <span class="card-suit">{{ getCardSymbol(game.nextCard!.suit) }}</span>
+                        </div>
+                        <div class="card-center">
+                            <span class="large-suit">{{ getCardSymbol(game.nextCard!.suit) }}</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="card-value flipped">{{ game.nextCard!.name }}</span>
+                            <span class="card-suit flipped">{{ getCardSymbol(game.nextCard!.suit) }}</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    
+    @if (!gameEnded && !showFeedback) {
+        <div class="game-buttons">
+            <button 
+                class="btn btn-success btn-large" 
+                (click)="makeGuess(true)"
+                [disabled]="!hasNextCard">
+                📈 MAYOR
+            </button>
+            <button 
+                class="btn btn-danger btn-large" 
+                (click)="makeGuess(false)"
+                [disabled]="!hasNextCard">
+                📉 MENOR
+            </button>
+        </div>
+    }
+    
+    @if (showFeedback) {
+        <div class="feedback">
+            <div class="feedback-message" [class.correct]="lastGuessCorrect" [class.wrong]="!lastGuessCorrect">
+                @if (!lastGuessCorrect) {
+                    <h3>❌ ¡Incorrecto!</h3>
+                    <p>¡Fin del juego! Tu racha fue de {{ currentStreak }} cartas.</p>
+                }
+                @if (lastGuessCorrect) {
+                    <h3>🎉 ¡Correcto!</h3>
+                    <p>¡Excelente! Continúa así...</p>
+                }
+            </div>
+        </div>
+
+    }
+    
+    @if (showResult) {
+        <div class="game-result" >
+            <div class="result-card">
+                <h2>🎴 Partida Finalizada</h2>
+                
+                <div class="final-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Cartas Acertadas:</span>
+                        <span class="stat-value big">{{ game.correctGuesses }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Precisión:</span>
+                        <span class="stat-value">
+                            {{ totalCards > 1 ? ((game.correctGuesses / (totalCards - 1)) * 100).toFixed(1) : 0 }}%
+                        </span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Tiempo Total:</span>
+                        <span class="stat-value">{{ calcularTotalTime() }}s</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Mejor Racha:</span>
+                        <span class="stat-value">{{ maxScore }}</span>
+                    </div>
+                </div>
+
+                <div class="result-actions">
+                    <button 
+                        class="btn btn-primary" 
+                        (click)="startNewGame()"
+                        [disabled]="isLoading">
+                        {{ isLoading ? 'Guardando...' : '🔄 Jugar de Nuevo' }}
+                    </button>
+                    <button class="btn btn-secondary" (click)="goHome()">🏠 Ir al Home</button>
+                </div>
+            </div>
+        </div>
+    }
+    
+    @if (isLoading) {
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Guardando resultado...</p>
+        </div>
+    }
+    
+    @if (game.gameStatus === 'playing' && !showFeedback) {
+        <div class="instructions">
+            <h3>📋 Cómo jugar:</h3>
+            <ul>
+                <li>Ve la carta actual y adivina si la siguiente será <strong>mayor</strong> o <strong>menor</strong></li>
+                <li>Los Ases (A) valen 1 y son las cartas más bajas</li>
+                <li>Las cartas van del 1 al 13 (A, 2, 3... J, Q, K)</li>
+                <li>Si aciertas, continúas. Si fallas, ¡fin del juego!</li>
+                <li>¡Intenta hacer la racha más larga posible!</li>
+            </ul>
+        </div>       
+    }
+
+</div>
