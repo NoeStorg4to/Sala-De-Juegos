@@ -59,7 +59,7 @@ export class AhorcadoGame implements OnInit {
       word: this.gameService.getRandomWord(),
       guessedLetters: [],
       wrongAttempts: 0,
-      maxAttempts: 6,
+      maxAttempts: 7,
       gameStatus: 'playing',
       startTime: new Date()
     };
@@ -82,7 +82,6 @@ export class AhorcadoGame implements OnInit {
   }
 
   private checkGameStatus() {
-    // Verificar si ganó
     const hasWon = this.game.word.split('').every(letter => 
       this.game.guessedLetters.includes(letter)
     );

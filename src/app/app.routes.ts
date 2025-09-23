@@ -14,7 +14,7 @@ import { SalaChat } from './components/sala.chat/sala.chat';
 export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
     { path: 'login', component: Login }, //, canActivate:[authGuardGuard]
-    { path: 'registro', component: Registro, canActivate:[authGuardGuard] },
+    { path: 'registro', component: Registro}, //, canActivate:[authGuardGuard] 
     { path: 'home', component: Home },
     { path: 'quien-soy', component: QuienSoy },
     // ------------ RUTAS DE JUEGOS ACA ------------------

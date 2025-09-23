@@ -5,11 +5,8 @@
         <button class="btn btn-secondary" (click)="goHome()">← Volver al Home</button>
     </header>
 
-    <!-- Contenido Principal -->
     <div class="main-content">
-        <!-- Columna Izquierda: Juego -->
         <div class="game-column">
-            <!-- Game Info -->
             <div class="game-info">
                 <div class="info-item">
                     <span class="label">Intentos restantes:</span>
@@ -20,10 +17,7 @@
                     <span class="value">{{ game.guessedLetters.length }}</span>
                 </div>
             </div>
-
-            <!-- Hangman y Palabra -->
             <div class="game-display">
-                <!-- Hangman -->
                 <div class="hangman-display">
                     <div class="hangman-drawing">
                         <div class="gallows">
@@ -32,8 +26,7 @@
                             <div class="top-bar"></div>
                             <div class="noose"></div>
                         </div>
-                        
-                        <!-- Partes del muñeco -->
+                        <!-- ################ OPTIMIZAR ############### -->
                         <div class="hangman-figure">
                             @if (game.wrongAttempts >= 1) {
                                 <div class="head"></div>
@@ -56,15 +49,12 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Palabra a adivinar -->
                 <div class="word-display">
                     <h2 class="word">{{ getDisplayWord() }}</h2>
                     <p class="word-length">{{ game.word.length }} letras</p>
                 </div>
             </div>
 
-            <!-- Teclado en el medio -->
             @if (!gameEnded) {
                 <div class="alphabet-container">
                     <div class="alphabet-grid">
@@ -83,24 +73,8 @@
                 </div>
             }
         </div>
-
-        <!-- Columna Derecha: Instrucciones (solo durante el juego) -->
-        @if (game.gameStatus === 'playing') {
-            <div class="instructions-column">
-                <div class="instructions">
-                    <h3>📋 Cómo jugar:</h3>
-                    <ul>
-                        <li>Adivina la palabra letra por letra</li>
-                        <li>Tienes {{ game.maxAttempts }} intentos</li>
-                        <li>Cada letra incorrecta añade una parte al ahorcado</li>
-                        <li>¡Completa la palabra antes de que se complete el dibujo!</li>
-                    </ul>
-                </div>
-            </div>
-        }
     </div>
 
-    <!-- Resultado del juego (abajo de todo) -->
     @if (showResult) {
         <div class="game-result">
             <div class="result-card" [class.won]="gameWon" [class.lost]="gameLost">
@@ -140,6 +114,19 @@
         <div class="loading">
             <div class="spinner"></div>
             <p>Guardando resultado...</p>
+        </div>
+    }
+    @if (game.gameStatus === 'playing') {
+        <div class="instructions">
+            <h3>📋 Cómo jugar:</h3>
+            <div class="instructions-grid">
+                <ul>
+                    <li>Adivina la palabra letra por letra</li>
+                    <li>Tienes {{ game.maxAttempts }} intentos</li>
+                    <li>Cada letra incorrecta añade una parte al ahorcado</li>
+                    <li>¡Completa la palabra antes de que se complete el dibujo!</li>
+                </ul>
+            </div>
         </div>
     }
 </div>
