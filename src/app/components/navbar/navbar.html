@@ -1,18 +1,39 @@
 <nav class="navbar">
     <div class="nav-container">
         <a routerLink="/home" class="nav-logo">🎮 NoliGames</a>
+
+        @if (authService.isAuthenticated() && currentProfile) {
+            <div class="user-welcome">
+                Hola {{ currentProfile.nombre | capitalize }}
+            </div>
+        }
+        @if (authService.isAuthenticated() && !currentProfile && currentUser) {
+            <div class="user-welcome">
+                Hola {{ currentUser.email | capitalize }}
+            </div>
+        }
+
         <div class="nav-menu">
             <nav>
                 <button class="nav-button" (click)="navigateTo('/home')">Home</button>
                 <button class="nav-button" (click)="navigateTo('/quien-soy')">Quién Soy</button>
 
-                @if (!authService.isAuthenticated()) {
+                <ng-container *showIfAuth="false">
+                    <button class="nav-button" (click)="navigateTo('/login')">Login</button>
+                    <button class="nav-button" (click)="navigateTo('/registro')">Registro</button>
+                </ng-container>
+
+                <ng-container *showIfAuth="true">
+                    <button class="nav-button" (click)="authService.logout()">Logout</button>
+                </ng-container>
+
+                <!-- @if (!authService.isAuthenticated()) {
                     <button class="nav-button" (click)="navigateTo('/login')">Login</button>
                     <button class="nav-button" (click)="navigateTo('/registro')">Registro</button>
                 }
                 @if (authService.isAuthenticated()) {
                     <button class="nav-button" (click)="authService.logout()">Logout</button>
-                }
+                } -->
             </nav>
         </div>
     </div>

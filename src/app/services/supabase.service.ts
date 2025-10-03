@@ -37,8 +37,8 @@ export class SupabaseService {
     constructor(private router: Router, private validationService: ValidateService) {
         this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
         auth: {
-            persistSession: false,  
-            autoRefreshToken: false 
+            persistSession: true,  
+            autoRefreshToken: true 
             }
         });
     }

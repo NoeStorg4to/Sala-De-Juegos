@@ -8,6 +8,7 @@ import { authGuardGuard } from './guards/auth-guard-guard';
 import { AhorcadoGame } from './components/ahorcado-game/ahorcado-game';
 import { MayorMenorGame } from './components/mayor-menor.game/mayor-menor.game';
 import { SalaChat } from './components/sala.chat/sala.chat';
+import { ageRestrictionGuard } from './guards/age-guard';
 
 
 
@@ -17,10 +18,12 @@ export const routes: Routes = [
     { path: 'registro', component: Registro}, //, canActivate:[authGuardGuard] 
     { path: 'home', component: Home },
     { path: 'quien-soy', component: QuienSoy },
-    // ------------ RUTAS DE JUEGOS ACA ------------------
-    { path: 'ahorcado', component: AhorcadoGame },
+
+    { path: 'ahorcado', component: AhorcadoGame, canActivate: [ageRestrictionGuard] },
     { path: 'mayorMenor', component: MayorMenorGame },
+    
     { path: 'chat', component: SalaChat },
+
     { path: '**', redirectTo: '/home' }
 ];
 
