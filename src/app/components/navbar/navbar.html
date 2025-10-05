@@ -4,7 +4,7 @@
 
         @if (authService.isAuthenticated() && currentProfile) {
             <div class="user-welcome">
-                Hola {{ currentProfile.nombre | capitalize }}
+                Hola {{ currentProfile.username | capitalize }}
             </div>
         }
         @if (authService.isAuthenticated() && !currentProfile && currentUser) {

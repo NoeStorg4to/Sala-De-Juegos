@@ -26,28 +26,38 @@ export class ChatService {
         }
     }
 
+    // CAMBIAMOS EL WAIT - AHORA VERIFICA EL USUARIO ACTUAL PARA AUTENTICAR A TIEMPO
     private async waitForAuth(): Promise<void> {
-    return new Promise((resolve, reject) => {
-        const subscription = this.auth.authState$.subscribe(authState => {
-        console.log('Estado de auth en chat:', authState);
-        
-        if (authState.isAuthenticated && authState.user && authState.profile) {
-            subscription.unsubscribe();
-            resolve();
-        } else if (authState.user === null && authState.profile === null) {
-            subscription.unsubscribe();
-            reject(new Error('Usuario no autenticado'));
-        }
-        // Si está undefined, seguimos esperando
-        });
-        
-        setTimeout(() => {
-        subscription.unsubscribe();
-        reject(new Error('Timeout esperando autenticación'));
-        }, 10000);
-    });
-}
+        return new Promise((resolve, reject) => {
+            // Primero verificar si ya está autenticado
+            const currentState = this.auth.getCurrentAuthState();
+            
+            if (currentState.isAuthenticated && currentState.user && currentState.profile) {
+                console.log('Ya autenticado:', currentState.profile.username); //#########
+                resolve();
+                return;
+            }
 
+            // Si no, esperar a que se autentique
+            const authSubscription = this.auth.authState$.subscribe(authState => {
+                console.log('Estado de auth en chat:', authState); //##############
+                
+                if (authState.isAuthenticated && authState.user && authState.profile) {
+                    console.log('Autenticado:', authState.profile.username);//##########
+                    authSubscription.unsubscribe();
+                    resolve();
+                } else if (authState.user === null && authState.profile === null) {
+                    authSubscription.unsubscribe();
+                    reject(new Error('Usuario no autenticado'));
+                }
+            });
+            
+            setTimeout(() => {
+                authSubscription.unsubscribe();
+                reject(new Error('Timeout esperando autenticación'));
+            }, 10000);
+        });
+}
     private async loadMessages(): Promise<void> {
         try {
             const { data, error } = await this.supabase.client
@@ -65,18 +75,29 @@ export class ChatService {
     }
 
     private setupRealtimeSubscription(): void {
+        const channelName = `messages_${Date.now()}`;
+
         this.subscription = this.supabase.client
-            .channel('messages')
+            .channel(channelName)
             .on('postgres_changes', 
-                { event: 'INSERT', schema: 'public', table: 'messages' },
+                { event: '*', schema: 'public', table: 'messages' },
                 (payload) => {
                     // ACA TODOS RECIBEN EL MENSAJE QUE SE INSERTA
+                    console.log('Nuevo mensaje recibido:', payload); // ######### CONSOLA
                     const newMessage = payload.new as ChatMessage;
                     const currentMessages = this.messagesSubject.value;
                     this.messagesSubject.next([...currentMessages, newMessage]);
                 }
             )
-            .subscribe();
+            .subscribe((status) => { // Ahora se activa la suscripcion - antes no lo hacia
+                console.log('Estado de suscripción:', status); // ######### CONSOLA
+                if (status === 'SUBSCRIBED') {
+                    console.log('✅ Conectado al chat en tiempo real!'); // ######### CONSOLA
+                }
+                if (status === 'CLOSED') {
+                    console.error(' Canal cerrado inesperadamente');
+                }
+            });
     }
 
     async sendMessage(message: string): Promise<void> {
@@ -111,6 +132,7 @@ export class ChatService {
     }
 
     cleanup(): void {
+        console.log('Limpiando suscripción del chat');
         if (this.subscription) {
             this.supabase.client.removeChannel(this.subscription);
         }
@@ -128,5 +150,21 @@ export class ChatService {
             minute: '2-digit' 
         });
     }
+
+    // testRealtime() {
+    //     console.log('Testeando Realtime...');
+        
+    //     const testChannel = this.supabase.client
+    //         .channel('test_channel')
+    //         .on('postgres_changes',
+    //             { event: '*', schema: 'public', table: 'messages' },
+    //             (payload) => {
+    //                 console.log(' REALTIME FUNCIONA!', payload);
+    //             }
+    //         )
+    //         .subscribe((status) => {
+    //             console.log('Test channel status:', status);
+    //         });
+    // }
 
 }

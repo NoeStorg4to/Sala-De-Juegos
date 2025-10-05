@@ -7,7 +7,7 @@ import { ChatMessage } from '../../interfaces_games/chat.interface';
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'app-sala.chat',
+  selector: 'app-sala-chat',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './sala.chat.html',
@@ -26,6 +26,7 @@ export class SalaChat implements OnInit, OnDestroy, AfterViewChecked{
   }
 
   async ngOnInit() {
+    // this.chatService.testRealtime();
     try {
       this.isLoading = true;
       await this.chatService.initializeChat();

@@ -40,3 +40,12 @@ export interface HigherLowerResult {
     accuracy: number; // porcentaje
     totalTime: number; // en segundos
 }
+
+// ------------------  PARA PREGUNTADOS
+export interface Quiestion {
+    question: string;
+    correct_answer: string;
+    incorrect_answwers: string[];
+    category: string;
+    difficulty: string;
+}
