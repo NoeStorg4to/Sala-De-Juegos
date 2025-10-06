@@ -1,0 +1,215 @@
+/* Estilos base con tema gamer */
+.preguntados-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    min-height: 100vh;
+    border: 2px solid #4ecca3;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(78, 204, 163, 0.3);
+}
+
+.preguntados-container h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #4ecca3;
+    text-shadow: 0 0 10px rgba(78, 204, 163, 0.7);
+}
+
+/* Pantalla de selección de dificultad */
+.difficulty-selection {
+    text-align: center;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(78, 204, 163, 0.3);
+}
+
+.difficulty-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Botones de dificultad */
+.btn-easy {
+    background: linear-gradient(45deg, #4ecca3, #6affc8);
+    color: #1a1a2e;
+}
+
+.btn-medium {
+    background: linear-gradient(45deg, #ffa726, #ffb74d);
+    color: #1a1a2e;
+}
+
+.btn-hard {
+    background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+    color: #1a1a2e;
+}
+
+.game-area {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(78, 204, 163, 0.3);
+}
+
+.progress-bar {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4ecca3, #6affc8);
+    border-radius: 5px;
+    transition: width 0.5s ease;
+}
+
+.question-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.question-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(78, 204, 163, 0.2);
+}
+
+.question-card h3 {
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    color: #4ecca3;
+}
+
+.options {
+    display: grid;
+    gap: 10px;
+}
+
+.option-btn {
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.option-btn:hover:not([disabled]) {
+    background: rgba(78, 204, 163, 0.2);
+    border-color: #4ecca3;
+    transform: translateX(5px);
+}
+
+.option-btn.selected {
+    background: rgba(78, 204, 163, 0.3);
+    border-color: #4ecca3;
+    box-shadow: 0 0 10px rgba(78, 204, 163, 0.5);
+}
+
+.option-btn.correct {
+    background: rgba(78, 204, 163, 0.5);
+    border-color: #4ecca3;
+    color: white;
+}
+
+.option-btn.incorrect {
+    background: rgba(255, 107, 107, 0.5);
+    border-color: #ff6b6b;
+    color: white;
+}
+
+.feedback {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.correct-msg {
+    color: #4ecca3;
+    text-shadow: 0 0 5px rgba(78, 204, 163, 0.5);
+}
+
+.results {
+    text-align: center;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(78, 204, 163, 0.3);
+}
+
+.final-score {
+    margin: 20px 0;
+    font-size: 1.2rem;
+}
+
+.final-score strong {
+    color: #4ecca3;
+}
+
+.btn-restart {
+    background: linear-gradient(45deg, #4ecca3, #6affc8);
+    color: #1a1a2e;
+    padding: 12px 30px;
+    font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+    .preguntados-container {
+        padding: 10px;
+    }
+    
+    .difficulty-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 200px;
+    }
+    
+    .question-info {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}

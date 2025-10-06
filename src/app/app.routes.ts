@@ -9,6 +9,7 @@ import { AhorcadoGame } from './components/ahorcado-game/ahorcado-game';
 import { MayorMenorGame } from './components/mayor-menor.game/mayor-menor.game';
 import { SalaChat } from './components/sala.chat/sala.chat';
 import { ageRestrictionGuard } from './guards/age-guard';
+import { Preguntados } from './components/preguntados/preguntados';
 
 
 
@@ -21,6 +22,7 @@ export const routes: Routes = [
 
     { path: 'ahorcado', component: AhorcadoGame, canActivate: [ageRestrictionGuard] },
     { path: 'mayorMenor', component: MayorMenorGame },
+    { path: 'preguntados', component: Preguntados },
     
     { path: 'chat', component: SalaChat },
 

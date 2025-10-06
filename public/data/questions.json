@@ -1,0 +1,74 @@
+{
+    "questions": [
+        {
+            "id": 1,
+            "question": "¿Cuál es la capital de Argentina?",
+            "correctAnswer": "Buenos Aires",
+            "options": ["Córdoba", "Buenos Aires", "Rosario", "Mendoza"],
+            "difficulty": "easy"
+        },
+        {
+            "id": 2,
+            "question": "¿En qué año se sancionó la Constitución Nacional Argentina?",
+            "correctAnswer": "1853",
+            "options": ["1810", "1816", "1853", "1880"],
+            "difficulty": "medium"
+        },
+        {
+            "id": 3, 
+            "question": "¿Qué equipo ganó el Mundial de Fútbol de 2022?",
+            "correctAnswer": "Argentina",
+            "options": ["Francia", "Brasil", "Argentina", "Alemania"],
+            "difficulty": "easy"
+        },
+        {
+            "id": 4,
+            "question": "¿Quién escribió 'El Aleph'?",
+            "correctAnswer": "Jorge Luis Borges",
+            "options": ["Julio Cortázar", "Ernesto Sábato", "Jorge Luis Borges", "Adolfo Bioy Casares"],
+            "difficulty": "medium"
+        },
+        {
+            "id": 5,
+            "question": "¿Cuál es la montaña más alta de Argentina?",
+            "correctAnswer": "Aconcagua",
+            "options": ["Cerro Mercedario", "Monte Pissis", "Aconcagua", "Volcán Llullaillaco"],
+            "difficulty": "medium"
+        },
+        {
+            "id": 6,
+            "question": "¿Quién fue la primera presidenta mujer de Argentina?",
+            "correctAnswer": "Cristina Fernández de Kirchner",
+            "options": ["Evita Perón", "Cristina Fernández de Kirchner", "María Estela Martínez de Perón", "Gabriela Michetti"],
+            "difficulty": "easy"
+        },
+        {
+            "id": 7,
+            "question": "¿Qué banda argentina es conocida por el tema 'De música ligera'?",
+            "correctAnswer": "Soda Stereo",
+            "options": ["Los Fabulosos Cadillacs", "Enanitos Verdes", "Soda Stereo", "Los Pericos"],
+            "difficulty": "easy"
+        },
+        {
+            "id": 8,
+            "question": "¿Quién fue el primer argentino en ganar un Premio Nobel?",
+            "correctAnswer": "Bernardo Houssay",
+            "options": ["Luis Federico Leloir", "Bernardo Houssay", "César Milstein", "Adolfo Pérez Esquivel"],
+            "difficulty": "hard"
+        },
+        {
+            "id": 9,
+            "question": "¿Qué actor argentino interpretó a 'El Zorro' en la serie de TV?",
+            "correctAnswer": "Facundo Arana",
+            "options": ["Leonardo Sbaraglia", "Facundo Arana", "Rodrigo de la Serna", "Pablo Echarri"],
+            "difficulty": "medium"
+        },
+        {
+            "id": 10,
+            "question": "¿Cuál de estos no es un postre típico argentino?",
+            "correctAnswer": "Churros",
+            "options": ["Dulce de leche", "Churros", "Alfajor", "Pastafrola"],
+            "difficulty": "easy"
+        }
+    ]
+}

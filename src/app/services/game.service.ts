@@ -144,6 +144,4 @@ export class GameService {
             return [];
         }
     }
-
-
 }

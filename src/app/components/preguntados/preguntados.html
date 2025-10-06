@@ -1,1 +1,68 @@
-<p>preguntados works!</p>
+<div class="preguntados-container">
+    <h1>Preguntados</h1>
+
+    <!-- PANTALA PARA SELECCION DE DIFFICULTY -->
+    @if(!gameStarted && !gameFinished){
+        <div class="difficulty-selection"> 
+            <h2>Selecciona la dificultad</h2>
+            <div class="difficulty-buttons">
+                <button (click)="startGame('easy')" class="btn btn-easy">Facil</button>
+                <button (click)="startGame('medium')" class="btn btn-medium">Medio</button>
+                <button (click)="startGame('hard')" class="btn btn-hard">Dificil</button>
+            </div>
+        </div>
+    }
+
+    @if(gameStarted && !gameFinished){
+        <div class="game-area">
+            <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="progress"></div>
+            </div>
+            
+            <div class="question-info">
+                <span>Pregunta {{ currentQuestionIndex + 1 }} de {{ questions.length }}</span>
+                <span>Puntaje: {{ score }}</span>
+            </div>
+
+            <div class="question-card">
+                <h3>{{ currentQuestion.question }}</h3>
+
+                <div class="options">
+                    @for(option of currentQuestion.options; track option) {
+                        <button
+                        (click)="selectAnswer(option)"
+                        [class.selected]="selectedAnswer === option"
+                        [class.correct]="showResult && option === currentQuestion.correctAnswer"
+                        [class.incorrect]="showResult && selectedAnswer === option && !isCorrect"
+                        [disabled]="showResult"
+                        class="option-btn">
+                        {{ option }}
+                        </button>
+                    }
+                </div>
+
+                @if(showResult) {
+                    <div class="feedback">
+                        @if(isCorrect){
+                            <p class="correct-msg">Correcto!</p>
+                        }
+                        @if(!isCorrect) {
+                            <p>Incorrecto. La respuesta era: {{ currentQuestion.correctAnswer }}</p>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    
+    @if(gameFinished) {
+        <div class="results">
+            <h2>Juego Terminado!</h2>
+                <div class="final-score">
+                    <p>Tu puntaje: <strong>{{ score }} / {{ questions.length }}</strong></p>
+                    <p>Porcentaje: <strong>{{ (score / questions.length * 100).toFixed(0) }}%</strong></p>
+                </div>
+            <button (click)="restartGame()" class="btn btn-restart">Jugar de nuevo</button>
+        </div>
+    }
+</div>

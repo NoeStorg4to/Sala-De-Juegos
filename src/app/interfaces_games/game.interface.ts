@@ -42,10 +42,24 @@ export interface HigherLowerResult {
 }
 
 // ------------------  PARA PREGUNTADOS
-export interface Quiestion {
+
+// export interface Question {
+//     id: number,
+//     category: string;
+//     question: string;
+//     correctAnswer: string;
+//     incorrectAnswers: string[];
+//     difficulty: string;
+// }
+
+export interface Question {
+    id: number;
     question: string;
-    correct_answer: string;
-    incorrect_answwers: string[];
-    category: string;
-    difficulty: string;
+    options: string[];
+    correctAnswer: string;
+    difficulty: 'easy' | 'medium' | 'hard';
+}
+
+export interface QuestionsResponse {
+    questions: Question[];
 }
