@@ -105,10 +105,12 @@ export class AuthService {
 
     async logout(): Promise<void> {
         try {
+            this.updateAuthState(null, null);
             await this.supabase.signOut();
+            console.log(' Logout completado');
         } catch (error) {
             console.error('Logout error:', error);
-            this.updateAuthState(null, null); // Forzar actualización del estado en caso de error
+            this.updateAuthState(null, null); // Forzar actualización del estado en caso de error (se cierra igual la sesion)
         }
     }
 

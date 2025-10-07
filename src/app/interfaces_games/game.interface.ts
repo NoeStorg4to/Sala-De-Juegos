@@ -42,16 +42,6 @@ export interface HigherLowerResult {
 }
 
 // ------------------  PARA PREGUNTADOS
-
-// export interface Question {
-//     id: number,
-//     category: string;
-//     question: string;
-//     correctAnswer: string;
-//     incorrectAnswers: string[];
-//     difficulty: string;
-// }
-
 export interface Question {
     id: number;
     question: string;
@@ -62,4 +52,15 @@ export interface Question {
 
 export interface QuestionsResponse {
     questions: Question[];
+}
+
+// ------------------ JUEGO PROPIO
+export interface GuessNumberGame {
+    difficulty: string;
+    numberToGuess: number;
+    maxAttempts: number;
+    currentAttempt: number;
+    score: number;
+    gameOver: boolean;
+    gameWon: boolean;
 }

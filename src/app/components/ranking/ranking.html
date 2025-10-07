@@ -1,0 +1,56 @@
+<div class="resultados-container">
+    <h1 class="title">Rankings de Juegos</h1>
+
+    <div class="game-selector">
+        @for(game of games; track game) {
+            <button 
+                [class.active]="selectedGame === game"
+                (click)="selectGame(game)"
+                class="game-btn"
+                >{{ gameInfo[game].icon }} {{ gameInfo[game].title }}</button>
+        }
+
+        @if(isLoading){
+            <div class="loading">
+                <p>Cargando rankigs...</p>
+            </div>
+        }
+        @if(!isLoading) {
+            <div class="ranking-table">
+                <h2>{{ gameInfo[selectedGame].icon }} {{ gameInfo[selectedGame].title }}</h2>
+
+                @if(rankings[selectedGame].length === 0) {
+                    <div class="no-data">No hay puntajes registrados aun</div>
+                }
+            </div>
+
+            @if(rankings[selectedGame].length > 0) {
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Posicion</th>
+                            <th>Jugador</th>
+                            <th>Puntaje</th>
+                            <th>Nivel</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for(score of rankings[selectedGame]; track score.id; let i = $index) {
+                            <tr [class.podium]="i < 3">
+                                <td class="position">{{ getMedalEmoji(i + 1) }}</td>
+                                <td class="player">
+                                    <strong>{{ score.profiles.username }}</strong>
+                                    <small>{{ score.profiles.name }} {{ score.profiles.lastname }}</small>
+                                </td>
+                                <td class="score">{{ score.score }}</td>
+                                <td class="level">{{ score.level }}</td>
+                                <td class="date">{{ formatDate(score.play_date) }}</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+    </div>
+</div>

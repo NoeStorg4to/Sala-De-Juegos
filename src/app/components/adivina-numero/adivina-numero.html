@@ -1,0 +1,88 @@
+<div class="game-header">
+    <h2>Adivina el Número</h2>
+    @if(topScore > 0) {
+        <div class="top-score">
+            Mejor Puntaje: {{ topScore }}
+        </div>
+    }
+</div>
+
+<div class="guess-number-container">
+    <h1>Adivina el Numero</h1>
+
+    @if(!gameStarted && !gameFinished){
+        <div class="difficulty-selection">
+            <h2>Selecciona la dificultad</h2>
+            <div class="difficulty-buttons">
+                <button (click)="startGame('easy')" class="btn btn-easy">Facil (1-50) - 10 intentos</button>
+                <button (click)="startGame('medium')" class="btn btn-medium">Medio (1-100) - 8 intentos</button>
+                <button (click)="startGame('hard')" class="btn btn-hard">Difícil (1-200) - 6 intentos</button>
+            </div>
+        </div>
+    }
+
+    @if(gameStarted && !gameFinished && currentGame) {
+        <div class="game-area">
+            <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="progress"></div>
+            </div>
+
+            <div class="game-info">
+                <span>Intentos: {{ currentGame.currentAttempt }} / {{ currentGame.maxAttempts }}</span>
+                <span>Puntaje posible: {{ currentGame.score }}</span>
+                <span>Dificultad: {{ getDifficultyName(currentGame.difficulty) }}</span>
+            </div>
+
+            <div class="game-card">
+                <h3>Adivina el numero entre 1 y {{ maxRange }}</h3>
+                <div class="input-area">
+                    <input 
+                        type="number"
+                        [(ngModel)]="userGuess"
+                        (keyup.enter)="makeGuess()"
+                        placeholder="Ingresa tu número"
+                        min="1"
+                        [max]="maxRange"
+                        class="number-input"
+                        >
+                    <button
+                        (click)="makeGuess()" 
+                        [disabled]="!userGuess || userGuess < 1 || userGuess > maxRange"
+                        class="btn btn-guess">
+                        Adivinar</button>
+                </div>
+
+                @if(showResult) {
+                    <div class="feedback" [class]="lastHint">
+                        <p>{{ resultMessage }}</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if(gameFinished && currentGame) {
+        <div class="results">
+            <h2>Juego Terminado!</h2>
+
+            @if(currentGame.gameWon) {
+                <div class="win-message">
+                    <p>Felicidades!! Adivinaste el numero</p>
+                </div>
+            } @else {
+                <div class="lose-message">
+                    <p>El numero era: <strong>{{ currentGame.numberToGuess }}</strong></p>
+                </div>
+            }
+
+            <div class="final-score">
+                <p>Intentos usados: <strong>{{ currentGame.currentAttempt }}</strong></p>
+                <p>Tu puntaje: <strong>{{ currentGame.score }}</strong></p>
+            </div>
+
+            <button (click)="restartGame()" class="btn btn-restart">Jugar de nuevo</button>
+        </div>
+    }
+
+
+</div>

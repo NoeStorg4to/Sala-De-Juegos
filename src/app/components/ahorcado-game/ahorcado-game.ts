@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { GameService } from '../../services/game.service';
 import { AuthService } from '../../services/auth.service';
 import { HangmanGame, HangmanResult } from '../../interfaces_games/game.interface';
+import { AhorcadoService } from '../../services/ahorcado.service';
 
 
 @Component({
@@ -31,6 +32,7 @@ export class AhorcadoGame implements OnInit {
 
   constructor(
     private gameService: GameService,
+    private ahorcadoService: AhorcadoService,
     private authService: AuthService,
     private router: Router
   ) {}
@@ -56,7 +58,7 @@ export class AhorcadoGame implements OnInit {
 
   startNewGame() {
     this.game = {
-      word: this.gameService.getRandomWord(),
+      word: this.ahorcadoService.getRandomWord(),
       guessedLetters: [],
       wrongAttempts: 0,
       maxAttempts: 7,
@@ -114,7 +116,7 @@ export class AhorcadoGame implements OnInit {
         word: this.game.word
       };
 
-      const saved = await this.gameService.saveHangmanResult(result);
+      const saved = await this.ahorcadoService.saveHangmanResult(result);
       
       if (saved) {
         console.log('Resultado guardado exitosamente');

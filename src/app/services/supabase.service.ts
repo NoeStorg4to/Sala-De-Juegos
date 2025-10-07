@@ -145,9 +145,17 @@ export class SupabaseService {
     }
 
     async signOut(): Promise<{ error: any }>{
-        const result = await this.supabase.auth.signOut();
-        this.router.navigate(['/home']);
-        return result;
+        try {
+            const result = await this.supabase.auth.signOut();
+            if (!result.error) {
+                console.log(' Sesión cerrada correctamente');
+            }
+            this.router.navigate(['/home']);
+            return result;
+        } catch (error) {
+            console.error('Error en signOut:', error);
+            return { error };
+        }
     }
 
     // OBTIENE EL PERFIL DE USUARIO POR ID

@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { GameService } from '../../services/game.service';
 import { AuthService } from '../../services/auth.service';
 import { HigherLowerGame, HigherLowerResult, Card } from '../../interfaces_games/game.interface';
-
+import { MayorMenorService } from '../../services/mayor-menor.service';
 
 
 @Component({
@@ -34,7 +34,7 @@ export class MayorMenorGame implements OnInit, OnDestroy{
   totalCards: number = 0;
   maxScore: number = 0;
 
-  constructor(private gameService: GameService, private authService: AuthService, private router: Router) {}
+  constructor(private mayorMenorService: MayorMenorService, private gameService: GameService,private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
     this.checkAuthentication();
@@ -67,7 +67,7 @@ export class MayorMenorGame implements OnInit, OnDestroy{
   }
 
   startNewGame() {
-    const deck = this.gameService.generateDeck();
+    const deck = this.mayorMenorService.generateDeck();
     this.game = {
       currentCard: deck[0],
       nextCard: deck[1],

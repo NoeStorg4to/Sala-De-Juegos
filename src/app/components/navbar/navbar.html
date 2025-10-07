@@ -27,6 +27,8 @@
                     <button class="nav-button" (click)="authService.logout()">Logout</button>
                 </ng-container>
 
+                <button class="nav-button" (click)="navigateTo('/ranking')">Rankings</button>
+
                 <!-- @if (!authService.isAuthenticated()) {
                     <button class="nav-button" (click)="navigateTo('/login')">Login</button>
                     <button class="nav-button" (click)="navigateTo('/registro')">Registro</button>
