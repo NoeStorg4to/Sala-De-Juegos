@@ -175,6 +175,49 @@
 .win-message { color: #4ecca3; }
 .lose-message { color: #ff6b6b; }
 
+.results {
+    text-align: center;
+    padding: 30px;
+    background: rgba(22, 33, 62, 0.8);
+    border-radius: 15px;
+    border: 1px solid #667eea;
+}
+
+.results h2 {
+    margin-bottom: 25px;
+    color: #4ecca3;
+    font-size: 1.8rem;
+}
+
+.results-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 25px;
+}
+
+
+.win-message, .lose-message {
+    margin-bottom: 25px;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.win-message {
+    background: rgba(78, 204, 163, 0.2);
+    border: 1px solid #4ecca3;
+    color: #4ecca3;
+}
+
+.lose-message {
+    background: rgba(255, 107, 107, 0.2);
+    border: 1px solid #ff6b6b;
+    color: #ff6b6b;
+}
+
 .results-info {
     background: rgba(255,255,255,0.05);
     padding: 20px;
@@ -234,6 +277,24 @@
 .player { flex: 1; margin: 0 10px; }
 .score { color: #ffa726; font-weight: bold; }
 .attempts { font-size: 0.8rem; opacity: 0.7; }
+
+.final-score {
+    margin: 30px 0;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.final-score p {
+    margin: 12px 0;
+    font-size: 1.1rem;
+}
+
+.final-score strong {
+    color: #4ecca3;
+    font-size: 1.2rem;
+}
 
 .guess-number-container {
     max-width: 600px;

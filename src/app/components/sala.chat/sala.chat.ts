@@ -28,17 +28,15 @@ export class SalaChat implements OnInit, OnDestroy{
     constructor(private chatService: ChatService, private authService: AuthService, private supabase: SupabaseService) {}
 
     async ngOnInit() {
-      console.log('🔵 ChatComponent ngOnInit - Componente inicializado');
+        this.authSubscription = this.authService.authState$.subscribe(state => {
+            console.log('🔐 Estado de auth cambió:', state.isAuthenticated);
 
-      this.authSubscription = this.authService.authState$.subscribe(state => {
-          console.log('🔐 Estado de auth cambió:', state.isAuthenticated);
-
-          this.isAuthenticated = state.isAuthenticated;
-          
-          if (this.isAuthenticated) {
-              this.initializeChat();
-          }
-      });
+            this.isAuthenticated = state.isAuthenticated;
+            
+            if (this.isAuthenticated) {
+                this.initializeChat();
+            }
+        });
     }
 
     private async initializeChat(): Promise<void> {
@@ -73,7 +71,6 @@ export class SalaChat implements OnInit, OnDestroy{
         
         if (result.error) {
             console.error('Error enviando mensaje:', result.error);
-            alert('Error al enviar el mensaje');
         } else {
             this.newMessage = '';
         }
@@ -109,7 +106,6 @@ export class SalaChat implements OnInit, OnDestroy{
     }
 
     ngOnDestroy(): void {
-      console.log('🔴 ChatComponent ngOnDestroy - Componente destruido');
         this.messagesSubscription?.unsubscribe();
         this.authSubscription?.unsubscribe();
         this.chatService.unsubscribeFromChat();
