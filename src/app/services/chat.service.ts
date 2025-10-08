@@ -3,6 +3,8 @@ import { SupabaseService } from './supabase.service';
 import { AuthService } from './auth.service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ChatMessage } from '../interfaces_games/chat.interface';
+import { RealtimeChannel } from '@supabase/supabase-js';
+
 
 
 @Injectable({
@@ -12,159 +14,118 @@ import { ChatMessage } from '../interfaces_games/chat.interface';
 export class ChatService {
     private messagesSubject = new BehaviorSubject<ChatMessage[]>([]);
     public messages$: Observable<ChatMessage[]> = this.messagesSubject.asObservable();
-    private subscription: any;
 
-    constructor(private supabase: SupabaseService,private auth: AuthService) {}
+    private channel: RealtimeChannel | null = null;
+    private isSubscribed = false;
+
+    constructor(private supabaseService: SupabaseService, private auth: AuthService){}
 
     async initializeChat(): Promise<void> {
+        if (this.isSubscribed) {
+            console.log('⚠️ Chat ya inicializado');
+            return
+        };
+
         try {
-            await this.waitForAuth();
             await this.loadMessages();
-            this.setupRealtimeSubscription();
-        } catch (error) {
+            console.log('📥 Mensajes cargados:', this.messagesSubject.value.length);
+
+            this.channel = this.supabaseService.client
+                .channel('public:messages')
+                .on(
+                    'postgres_changes',
+                    {event: 'INSERT', schema: 'public', table: 'messages'}, (payload) => {
+                        console.log('Nuevo mensaje recibido:', payload);
+                        this.handleNewMessage(payload.new as ChatMessage);
+                    }
+                )
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('Suscrito al chat en tiempo real');
+                        this.isSubscribed = true;
+                    } else if (status === 'CHANNEL_ERROR') {
+                        console.error('❌ Error en el canal de Realtime');
+                    } else if (status === 'TIMED_OUT') {
+                        console.error('⏱️ Timeout en la suscripción');
+                    }
+                })
+        }catch (error) {
             console.error('Error inicializando chat:', error);
         }
     }
 
-    // CAMBIAMOS EL WAIT - AHORA VERIFICA EL USUARIO ACTUAL PARA AUTENTICAR A TIEMPO
-    private async waitForAuth(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            // Primero verificar si ya está autenticado
-            const currentState = this.auth.getCurrentAuthState();
-            
-            if (currentState.isAuthenticated && currentState.user && currentState.profile) {
-                console.log('Ya autenticado:', currentState.profile.username); //#########
-                resolve();
-                return;
-            }
-
-            // Si no, esperar a que se autentique
-            const authSubscription = this.auth.authState$.subscribe(authState => {
-                console.log('Estado de auth en chat:', authState); //##############
-                
-                if (authState.isAuthenticated && authState.user && authState.profile) {
-                    console.log('Autenticado:', authState.profile.username);//##########
-                    authSubscription.unsubscribe();
-                    resolve();
-                } else if (authState.user === null && authState.profile === null) {
-                    authSubscription.unsubscribe();
-                    reject(new Error('Usuario no autenticado'));
-                }
-            });
-            
-            setTimeout(() => {
-                authSubscription.unsubscribe();
-                reject(new Error('Timeout esperando autenticación'));
-            }, 10000);
-        });
-}
     private async loadMessages(): Promise<void> {
         try {
-            const { data, error } = await this.supabase.client
+            const { data, error } = await this.supabaseService.client
                 .from('messages')
                 .select('*')
-                .order('created_at', { ascending: true })
-                .limit(50); // tope de 50 para no traer tantos mensajes innecesarios y viejos
-
+                .order('created_at', { ascending: true})
+                .limit(50);
+            
             if (error) throw error;
-            this.messagesSubject.next(data || []);
-        } catch (error) {
+
+            this.messagesSubject.next(data || [])
+        }catch (error){
             console.error('Error cargando mensajes:', error);
-            throw error;
         }
     }
 
-    private setupRealtimeSubscription(): void {
-        const channelName = `messages_${Date.now()}`;
+    private handleNewMessage(newMessage: ChatMessage): void {
+        const currentMessages = this.messagesSubject.value;
 
-        this.subscription = this.supabase.client
-            .channel(channelName)
-            .on('postgres_changes', 
-                { event: '*', schema: 'public', table: 'messages' },
-                (payload) => {
-                    // ACA TODOS RECIBEN EL MENSAJE QUE SE INSERTA
-                    console.log('Nuevo mensaje recibido:', payload); // ######### CONSOLA
-                    const newMessage = payload.new as ChatMessage;
-                    const currentMessages = this.messagesSubject.value;
-                    this.messagesSubject.next([...currentMessages, newMessage]);
-                }
-            )
-            .subscribe((status) => { // Ahora se activa la suscripcion - antes no lo hacia
-                console.log('Estado de suscripción:', status); // ######### CONSOLA
-                if (status === 'SUBSCRIBED') {
-                    console.log('✅ Conectado al chat en tiempo real!'); // ######### CONSOLA
-                }
-                if (status === 'CLOSED') {
-                    console.error(' Canal cerrado inesperadamente');
-                }
-            });
+        const messageExists = currentMessages.some(msg => msg.id === newMessage.id);
+
+        if (!messageExists) {
+            this.messagesSubject.next([...currentMessages, newMessage]);
+        }
     }
 
-    async sendMessage(message: string): Promise<void> {
+    async sendMessage(messageText: string): Promise<{ error: any }> {
         try {
             const currentUser = this.auth.getCurrentUser();
             const currentProfile = this.auth.getCurrentProfile();
 
-            if (!currentUser || !currentProfile) {
-                throw new Error('Usuario no autenticado');
+            if(!currentUser || !currentProfile) {
+                return { error: new Error('Usuario no autenticado') };
             }
 
-            if (!message.trim()) {
-                throw new Error('El mensaje no puede estar vacío');
-            }
-
-            const messageData = {
+            const messageData: Omit<ChatMessage, 'id'> = {
                 user_id: currentUser.id,
                 username: currentProfile.username,
-                message: message.trim()
+                message: messageText.trim(),
+                created_at: new Date().toISOString()
             };
 
-            const { error } = await this.supabase.client
-                .from('messages')
-                .insert(messageData);
+            const { error } = await this.supabaseService.client
+                .from('messages').insert(messageData);
 
-            if (error) throw error;
+                if (error) throw error;
 
-        } catch (error) {
+                return { error: null };
+        }catch (error) {
             console.error('Error enviando mensaje:', error);
-            throw error;
+            return { error };
         }
     }
 
-    cleanup(): void {
-        console.log('Limpiando suscripción del chat');
-        if (this.subscription) {
-            this.supabase.client.removeChannel(this.subscription);
+    // LIMPIAR SUSCRIPCION DEL CHAT
+    unsubscribeFromChat(): void {
+        if (this.channel) {
+            this.supabaseService.client.removeChannel(this.channel);
+            this.channel = null;
+            this.isSubscribed = false;
+            console.log(' Desuscrito del chat');
         }
     }
 
+    //MENSAJE ES DE USUARIO?
     isOwnMessage(message: ChatMessage): boolean {
         const currentUser = this.auth.getCurrentUser();
         return currentUser?.id === message.user_id;
     }
 
-    formatMessageTime(timestamp: string): string {
-        const date = new Date(timestamp);
-        return date.toLocaleTimeString('es-AR', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
+    // OBTENER MENSAJES ACTUALES
+    getCurrentMessages(): ChatMessage[] {
+        return this.messagesSubject.value;
     }
-
-    // testRealtime() {
-    //     console.log('Testeando Realtime...');
-        
-    //     const testChannel = this.supabase.client
-    //         .channel('test_channel')
-    //         .on('postgres_changes',
-    //             { event: '*', schema: 'public', table: 'messages' },
-    //             (payload) => {
-    //                 console.log(' REALTIME FUNCIONA!', payload);
-    //             }
-    //         )
-    //         .subscribe((status) => {
-    //             console.log('Test channel status:', status);
-    //         });
-    // }
-
 }

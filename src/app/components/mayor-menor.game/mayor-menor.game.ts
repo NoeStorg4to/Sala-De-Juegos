@@ -34,7 +34,10 @@ export class MayorMenorGame implements OnInit, OnDestroy{
   totalCards: number = 0;
   maxScore: number = 0;
 
-  constructor(private mayorMenorService: MayorMenorService, private gameService: GameService,private authService: AuthService, private router: Router) {}
+  constructor(private mayorMenorService: MayorMenorService, 
+    private gameService: GameService,
+    private authService: AuthService, 
+    private router: Router) {}
 
   ngOnInit() {
     this.checkAuthentication();
@@ -117,7 +120,7 @@ export class MayorMenorGame implements OnInit, OnDestroy{
       } else {
         this.nextRound(); // ContinuO con la siguiente carta
       }
-    }, 1500);
+    }, 1000);
   }
 
   private nextRound() {

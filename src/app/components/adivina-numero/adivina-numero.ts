@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { GuessNumberGame } from '../../interfaces_games/game.interface';
 import { GuessNumberService } from '../../services/adivina-numero.service';
-import { SupabaseService } from '../../services/supabase.service';
 import { FormsModule } from '@angular/forms';
 import { GameService } from '../../services/game.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-adivina-numero',
@@ -23,9 +23,9 @@ export class AdivinaNumero implements OnInit{
   lastHint: string = '';
 
   constructor(
-    private guessNumberService: GuessNumberService, 
-    private supabaseService: SupabaseService,
-    private gameService: GameService) {}
+    private guessNumberService: GuessNumberService,
+    private gameService: GameService,
+    private router: Router) {}
 
     topScore: number = 0;
     
@@ -91,25 +91,14 @@ export class AdivinaNumero implements OnInit{
     try {
       if (!this.currentGame) return;
 
-      const difficultyLevel = this.getDifficultyLevel(this.currentGame.difficulty);
-
-      await this.supabaseService.saveGameScore(
+      await this.gameService.saveScoreWithDifficulty(
         'AdivinaNumero',
         this.currentGame.score,
-        difficultyLevel
+        this.currentGame.difficulty
       );
       console.log('Score guardado correctamente');
     }catch (error) {
       console.error('Error al guardar score:', error);
-    }
-  }
-
-  private getDifficultyLevel(difficulty: string): number {
-    switch (difficulty) {
-      case 'easy': return 1;
-      case 'medium': return 2;
-      case 'hard': return 3;
-      default: return 1;
     }
   }
 
@@ -145,5 +134,9 @@ export class AdivinaNumero implements OnInit{
       hard: 'Dificil'
     };
     return names[difficulty] || difficulty;
+  }
+
+  goHome() {
+    this.router.navigate(['/home']);
   }
 }

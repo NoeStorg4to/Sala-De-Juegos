@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ChatService } from '../../services/chat.service';
 import { AuthService } from '../../services/auth.service';
 import { ChatMessage } from '../../interfaces_games/chat.interface';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-sala-chat',
@@ -13,88 +14,106 @@ import { Observable } from 'rxjs';
   templateUrl: './sala.chat.html',
   styleUrl: './sala.chat.css'
 })
-export class SalaChat implements OnInit, OnDestroy, AfterViewChecked{
+export class SalaChat implements OnInit, OnDestroy{
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   
-  messages$: Observable<ChatMessage[]>;
-  newMessage: string = '';
-  isLoading: boolean = false;
-  error: string = '';
+    isChatOpen = false;
+    messages: ChatMessage[] = [];
+    newMessage = '';
+    isAuthenticated = false;
 
-  constructor(private chatService: ChatService, private authService: AuthService) {
-    this.messages$ = this.chatService.messages$;
-  }
+    private messagesSubscription?: Subscription;
+    private authSubscription?: Subscription;
 
-  async ngOnInit() {
-    // this.chatService.testRealtime();
-    try {
-      this.isLoading = true;
-      await this.chatService.initializeChat();
-    } catch (error) {
-      console.error('Error inicializando chat:', error);
-      this.error = 'Error al cargar el chat. Por favor, intenta nuevamente.';
-    } finally {
-      this.isLoading = false;
-    }
-  }
+    constructor(private chatService: ChatService, private authService: AuthService, private supabase: SupabaseService) {}
 
-  ngAfterViewChecked() { // Se ejecuta despues de que angular actualiza la vista
-    this.scrollToBottom();
-  }
+    async ngOnInit() {
+      console.log('🔵 ChatComponent ngOnInit - Componente inicializado');
 
-  ngOnDestroy() {
-    this.chatService.cleanup();
-  }
+      this.authSubscription = this.authService.authState$.subscribe(state => {
+          console.log('🔐 Estado de auth cambió:', state.isAuthenticated);
 
-  async sendMessage() {
-    if (!this.newMessage.trim() || this.isLoading) {
-      return;
+          this.isAuthenticated = state.isAuthenticated;
+          
+          if (this.isAuthenticated) {
+              this.initializeChat();
+          }
+      });
     }
 
-    const messageToSend = this.newMessage.trim();
-    this.newMessage = '';
-    this.error = '';
+    private async initializeChat(): Promise<void> {
+        await this.chatService.initializeChat();
 
-    try {
-      await this.chatService.sendMessage(messageToSend);
-    } catch (error: any) {
-      console.error('Error enviando mensaje:', error);
-      this.error = error.message || 'Error al enviar mensaje';
-      this.newMessage = messageToSend;
+        this.messagesSubscription = this.chatService.messages$.subscribe(messages => {
+            this.messages = messages;
+            setTimeout(() => this.scrollToBottom(), 100);
+        });
     }
-  }
 
-  onKeyPress(event: KeyboardEvent) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      this.sendMessage();
+    toggleChat(): void {
+        if (!this.isAuthenticated) {
+            alert('Debes iniciar sesión para usar el chat'); //CAMBIAR POR MODAL
+            return;
+        }
+        this.isChatOpen = !this.isChatOpen;
+        
+        if (this.isChatOpen) {
+            setTimeout(() => this.scrollToBottom(), 100);
+        }
     }
-  }
 
-  isOwnMessage(message: ChatMessage): boolean {
-    return this.chatService.isOwnMessage(message);
-  }
-
-  formatTime(timestamp: string): string {
-    return this.chatService.formatMessageTime(timestamp);
-  }
-
-  trackByMessageId(index: number, message: ChatMessage): string {
-    return message.id;
-  }
-
-  private scrollToBottom(): void {
-    try {
-      if (this.messagesContainer) {
-        this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
-      }
-    } catch (err) {
-      console.error('Error scrolling to bottom:', err);
+    closeChat(): void {
+        this.isChatOpen = false;
     }
-  }
 
-  getCurrentUsername(): string {
-    return this.authService.getCurrentProfile()?.username || 'Usuario';
-  }
+    async sendMessage(): Promise<void> {
+        if (!this.newMessage.trim()) return;
 
+        const result = await this.chatService.sendMessage(this.newMessage);
+        
+        if (result.error) {
+            console.error('Error enviando mensaje:', result.error);
+            alert('Error al enviar el mensaje');
+        } else {
+            this.newMessage = '';
+        }
+    }
+
+    onKeyPress(event: KeyboardEvent): void {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            this.sendMessage();
+        }
+    }
+
+    isOwnMessage(message: ChatMessage): boolean {
+        return this.chatService.isOwnMessage(message);
+    }
+
+    formatTime(dateString: string): string {
+        const date = new Date(dateString);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+
+    private scrollToBottom(): void {
+        try {
+            if (this.messagesContainer) {
+                this.messagesContainer.nativeElement.scrollTop = 
+                    this.messagesContainer.nativeElement.scrollHeight;
+            }
+        } catch (err) {
+            console.error('Error al hacer scroll:', err);
+        }
+    }
+
+    ngOnDestroy(): void {
+      console.log('🔴 ChatComponent ngOnDestroy - Componente destruido');
+        this.messagesSubscription?.unsubscribe();
+        this.authSubscription?.unsubscribe();
+        this.chatService.unsubscribeFromChat();
+    }
+
+    
 }

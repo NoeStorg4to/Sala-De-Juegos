@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Question } from '../../interfaces_games/game.interface';
 import { PreguntadosService } from '../../services/preguntados.service';
 import { CommonModule } from '@angular/common';
-import { SupabaseService } from '../../services/supabase.service';
+import { GameService } from '../../services/game.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-preguntados',
@@ -23,7 +24,7 @@ export class Preguntados implements OnInit{
   isCorrect: boolean = false;
 
 
-  constructor(private preguntadosService: PreguntadosService, private supabaseService: SupabaseService) {}
+  constructor(private preguntadosService: PreguntadosService, private gameService: GameService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadQuestions();
@@ -85,25 +86,16 @@ export class Preguntados implements OnInit{
 
   async saveScorePreguntados(): Promise<void> {
     try {
-      const difficultyLevel = this.getDifficultyLevel(this.questions[0]?.difficulty);
-
-      await this.supabaseService.saveGameScore(
+      if (!this.questions[0]) return;
+  
+      await this.gameService.saveScoreWithDifficulty(
         'Preguntados',
         this.score,
-        difficultyLevel
-      )
+        this.questions[0].difficulty
+      );
       console.log('Score guardado correctamente');
     } catch (error) {
       console.error('Error al guardar score:', error);
-    }
-  }
-
-  private getDifficultyLevel(difficulty: string): number {
-    switch (difficulty) {
-      case 'easy': return 1;
-      case 'medium': return 2;
-      case 'hard': return 3;
-      default: return 1;
     }
   }
 
@@ -119,5 +111,9 @@ export class Preguntados implements OnInit{
 
   get progress(): number{
     return ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
+  }
+
+  goHome() {
+    this.router.navigate(['/home']);
   }
 }

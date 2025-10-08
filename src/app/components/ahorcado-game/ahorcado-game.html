@@ -1,5 +1,4 @@
 <div class="hangman-container">
-    <!-- Header -->
     <header class="game-header">
         <h1>Juego del Ahorcado</h1>
         <button class="btn btn-secondary" (click)="goHome()">← Volver al Home</button>
@@ -17,61 +16,40 @@
                     <span class="value">{{ game.guessedLetters.length }}</span>
                 </div>
             </div>
-            <div class="game-display">
-                <div class="hangman-display">
-                    <div class="hangman-drawing">
-                        <div class="gallows">
-                            <div class="base"></div>
-                            <div class="pole"></div>
-                            <div class="top-bar"></div>
-                            <div class="noose"></div>
-                        </div>
-                        <!-- ################ OPTIMIZAR ############### -->
-                        <div class="hangman-figure">
-                            @if (game.wrongAttempts >= 1) {
-                                <div class="head"></div>
-                            }
-                            @if (game.wrongAttempts >= 2) {
-                                <div class="body"></div>
-                            }
-                            @if (game.wrongAttempts >= 3) {
-                                <div class="left-arm"></div>
-                            }
-                            @if (game.wrongAttempts >= 4) {
-                                <div class="right-arm"></div>
-                            }
-                            @if (game.wrongAttempts >= 5) {
-                                <div class="left-leg"></div>
-                            }
-                            @if (game.wrongAttempts >= 6) {
-                                <div class="right-leg"></div>
-                            }
+
+            <div class="game-area-horizontal">
+                <div class="hangman-column">
+                    <div class="game-display">
+                        <div class="hangman-image-container">
+                            <img [src]="getHangmanImage()" [alt]="'Ahorcado - ' + game.wrongAttempts + ' errores'" class="hangman-image">
+                            
+                            <div class="word-display">
+                                <h2 class="word">{{ getDisplayWord() }}</h2>
+                                <p class="word-length">{{ game.word.length }} letras</p>
+                            </div>    
                         </div>
                     </div>
                 </div>
-                <div class="word-display">
-                    <h2 class="word">{{ getDisplayWord() }}</h2>
-                    <p class="word-length">{{ game.word.length }} letras</p>
+                <div class="keyboard-column">
+                    @if (!gameEnded) {
+                        <div class="alphabet-container">
+                            <div class="alphabet-grid">
+                                @for (letter of alphabet; track letter) {
+                                    <button 
+                                        class="letter-btn"
+                                        [class.guessed]="isLetterGuessed(letter)"
+                                        [class.wrong]="isLetterWrong(letter)"
+                                        [class.correct]="isLetterGuessed(letter) && game.word.includes(letter)"
+                                        [disabled]="isLetterGuessed(letter) || gameEnded"
+                                        (click)="guessLetter(letter)">
+                                        {{ letter }}
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
-
-            @if (!gameEnded) {
-                <div class="alphabet-container">
-                    <div class="alphabet-grid">
-                        @for (letter of alphabet; track letter) {
-                            <button 
-                                class="letter-btn"
-                                [class.guessed]="isLetterGuessed(letter)"
-                                [class.wrong]="isLetterWrong(letter)"
-                                [class.correct]="isLetterGuessed(letter) && game.word.includes(letter)"
-                                [disabled]="isLetterGuessed(letter) || gameEnded"
-                                (click)="guessLetter(letter)">
-                                {{ letter }}
-                            </button>
-                        }
-                    </div>
-                </div>
-            }
         </div>
     </div>
 

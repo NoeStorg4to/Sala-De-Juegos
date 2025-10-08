@@ -29,15 +29,4 @@
             </div>
         </div>
     </div>
-
-    <div class="chat-widget-container" [class.open]="isChatOpen">
-        @if(isChatOpen) {
-            <app-sala-chat></app-sala-chat>
-        }
-    </div>
-    <button class="btn-gamer btn-chat-floating" (click)="toggleChat()" [class.hidden]="isChatOpen">
-        <span class="chat-icon">💬</span>
-        <span class="chat-text">Chat Global</span>
-        <div class="chat-pulse"></div>
-    </button>
 </div>

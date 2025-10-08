@@ -1,6 +1,5 @@
 <div class="preguntados-container">
     <h1>Preguntados</h1>
-
     <!-- PANTALA PARA SELECCION DE DIFFICULTY -->
     @if(!gameStarted && !gameFinished){
         <div class="difficulty-selection"> 
@@ -63,6 +62,8 @@
                     <p>Porcentaje: <strong>{{ (score / questions.length * 100).toFixed(0) }}%</strong></p>
                 </div>
             <button (click)="restartGame()" class="btn btn-restart">Jugar de nuevo</button>
+            <button class="btn btn-secondary" (click)="goHome()">Ir al Home</button>
         </div>
     }
+    
 </div>

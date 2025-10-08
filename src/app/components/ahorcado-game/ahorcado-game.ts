@@ -56,12 +56,17 @@ export class AhorcadoGame implements OnInit {
     }
   }
 
+  getHangmanImage(): string {
+    const attempt = Math.min(this.game.wrongAttempts, this.game.maxAttempts);
+    return `imagenes/ahorcado-${attempt}.png`
+  }
+
   startNewGame() {
     this.game = {
       word: this.ahorcadoService.getRandomWord(),
       guessedLetters: [],
       wrongAttempts: 0,
-      maxAttempts: 7,
+      maxAttempts: 6,
       gameStatus: 'playing',
       startTime: new Date()
     };
@@ -116,7 +121,7 @@ export class AhorcadoGame implements OnInit {
         word: this.game.word
       };
 
-      const saved = await this.ahorcadoService.saveHangmanResult(result);
+      const saved = await this.gameService.saveHangmanResult(result);
       
       if (saved) {
         console.log('Resultado guardado exitosamente');
@@ -152,9 +157,9 @@ export class AhorcadoGame implements OnInit {
     return this.game.guessedLetters.includes(letter) && !this.game.word.includes(letter);
   }
 
-  getHangmanImage(): string {
-    return `assets/hangman/hangman-${this.game.wrongAttempts}.svg`; // Retorna la imagen del ahorcado basada en los intentos fallidos
-  }
+  // getHangmanImage(): string {
+  //   return `assets/hangman/hangman-${this.game.wrongAttempts}.svg`; // Retorna la imagen del ahorcado basada en los intentos fallidos
+  // }
 
   goHome() {
     this.router.navigate(['/home']);

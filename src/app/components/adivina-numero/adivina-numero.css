@@ -8,6 +8,23 @@
     color: white;
 }
 
+.game-header h2 {
+    margin: 0;
+    background: linear-gradient(45deg, #ff6b6b, #4ecca3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2.2rem;
+}
+
+.guess-number-container h1{
+    background: #4ecca3;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2.2rem;
+}
+
 .game-card {
     text-align: center; 
     padding: 30px;
@@ -40,12 +57,49 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-.btn-easy { background: linear-gradient(45deg, #4ecca3, #6affc8); color: #1a1a2e; }
-.btn-medium { background: linear-gradient(45deg, #ffa726, #ffb74d); color: #1a1a2e; }
-.btn-hard { background: linear-gradient(45deg, #ff6b6b, #ff8e8e); color: #1a1a2e; }
+.btn-easy { background: linear-gradient(45deg, #045e10ff, #a8f1d7ff); color: #1a1a2e; }
+.btn-medium { background: linear-gradient(45deg, #975c03ff, #fde5c1ff); color: #1a1a2e; }
+.btn-hard { background: linear-gradient(45deg, #a8021dff, #ff8e8e); color: #1a1a2e; }
 .btn-guess { background: linear-gradient(45deg, #4ecca3, #6affc8); color: #1a1a2e; }
 .btn-restart { background: linear-gradient(45deg, #4ecca3, #6affc8); color: #1a1a2e; }
 .btn-leaderboard { background: linear-gradient(45deg, #ffa726, #ffb74d); color: #1a1a2e; }
+
+.btn-easy:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                0 0 20px rgba(255, 107, 107, 0.3),
+                0 0 30px rgba(78, 204, 163, 0.2);
+    border-color: #4ecca3;
+}
+.btn-medium:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                0 0 20px rgba(255, 107, 107, 0.3),
+                0 0 30px rgba(78, 204, 163, 0.2);
+    border-color: #f7a326ff;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-hard:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                0 0 20px rgba(255, 107, 107, 0.3),
+                0 0 30px rgba(78, 204, 163, 0.2);
+    border-color: #fa1313ff;
+}
 
 .game-header {
     margin-bottom: 20px;
@@ -58,6 +112,7 @@
     font-size: 0.9rem;
     opacity: 0.8;
 }
+
 
 .game-input {
     display: flex;

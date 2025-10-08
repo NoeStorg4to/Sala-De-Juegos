@@ -18,11 +18,48 @@ export class GameService {
         ADIVINA_NUMERO: 'AdivinaNumero'
     } as const;
 
+    // SCORE PARA JUEGOS CON DIFICULTAD
+    async saveScoreWithDifficulty(gameName: string, score: number, difficulty: string): Promise<boolean> {
+        try {
+            const level = this.mapDifficultyToLevel(difficulty);
+            await this.supabaseService.saveGameScore(gameName, score, level);
+            console.log(`Score guardado en ${gameName}: ${score} pts (nivel ${level})`);
+            return true;
+        }catch (error) {
+            console.error(` Error guardando score en ${gameName}:`, error);
+            return false;
+        }
+    }
+
+    // CALCULOS DE SCORE
+    private mapDifficultyToLevel(difficulty: string): number {
+        const levels: Record<string, number> = {
+            easy: 1,
+            medium: 2,
+            hard: 3
+        }
+        return levels[difficulty.toLocaleLowerCase()] ?? 1;
+    }
+
+    private calcularHangmanScore(result: HangmanResult): number {
+        let score = 1000; // Base
+        
+        if (result.totalTime > 30) {  // Penalizar por tiempo
+            score -= (result.totalTime - 30);
+        }
+        score -= result.wrongAttempts * 50;  // Penalizar por intentos fallidos
+        
+        if (result.lettersUsed < result.word.length + 3) { // Bonus por usar pocas letras
+            score += 100;
+        }
+        return Math.max(0, score);
+    }
+
     // GUARDA EL DE MAYOR O MENOR
     async saveHigherLowerResult(result: HigherLowerResult): Promise<boolean> {
         try {
             await this.supabaseService.saveGameScore(
-                'mayor_menor', 
+                this.GAME_NAMES.MAYOR_MENOR, 
                 result.correctGuesses, 
                 Math.round(result.accuracy)
             );
@@ -35,6 +72,30 @@ export class GameService {
         }
     }
 
+    // GUARDA EL AHORCADO
+    async saveHangmanResult(result: HangmanResult): Promise<boolean> {
+        try {
+            if (!result.won) {
+                console.log('Juego perdido, no se guarda score');
+                return false;
+            }
+
+            const score = this.calcularHangmanScore(result);
+            await this.supabaseService.saveGameScore(
+                this.GAME_NAMES.AHORCADO, 
+                score, 
+                result.totalTime
+            );
+            
+            console.log(`Score de Ahorcado guardado: ${score} pts`);
+            return true;
+        } catch (error) {
+            console.error('Error guardando resultado de ahorcado:', error);
+            return false;
+        }
+    }
+
+    // METODOS PARA OBTENER SCORES
     async getBestScores(gameName: string, limit: number = 10){
         try {
             const { data, error } = await this.supabaseService.client

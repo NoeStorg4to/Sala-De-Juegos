@@ -1,59 +1,43 @@
-<div class="chat-container">
-    <div class="chat-header">
-        <h2>💬 Sala de Chat Global</h2>
-        <p>Conectado como: <strong>{{ getCurrentUsername() }}</strong></p>
-    </div>
+@if (isAuthenticated) {
+    <button class="chat-button" (click)="toggleChat()">
+        💬
+    </button>
+}
 
-    @if (error) {
-        <div class="error-message">
-            {{ error }}
-        </div>
-    }
-    
-    @if (isLoading) {
-        <div class="loading">
-            <p>Cargando mensajes...</p>
-        </div>
-    }
-    
-    <div class="messages-container" #messagesContainer>
-
-        <div *ngFor="let message of messages$ | async; trackBy: trackByMessageId" 
-            class="message" 
-            [ngClass]="{'own-message': isOwnMessage(message), 'other-message': !isOwnMessage(message)}">
+@if (isChatOpen) {
+    <div class="chat-overlay" (click)="closeChat()">
+        <div class="chat-box" (click)="$event.stopPropagation()">
         
-        <div class="message-header">
-            <span class="username">{{ message.username }}</span>
-            <span class="timestamp">{{ formatTime(message.created_at) }}</span>
+        <div class="chat-header">
+            <h3>Chat Global</h3>
+            <button (click)="closeChat()">✕</button>
         </div>
-        
-        <div class="message-content">
-            {{ message.message }}
-        </div>
-        </div>
-    </div>
 
-    <div class="message-input-container">
-        <div class="input-group">
-        <input 
+        <div class="chat-messages" #messagesContainer>
+            @if (messages.length === 0) {
+            <p>No hay mensajes</p>
+            }
+            
+            @for (message of messages; track message.id) {
+            <div [class]="isOwnMessage(message) ? 'message own' : 'message'">
+                <strong>{{ isOwnMessage(message) ? 'Tú' : message.username }}</strong>
+                <span>{{ formatTime(message.created_at) }}</span>
+                <p>{{ message.message }}</p>
+            </div>
+            }
+        </div>
+
+        <div class="chat-input">
+            <input 
             type="text" 
-            [(ngModel)]="newMessage" 
+            [(ngModel)]="newMessage"
             (keypress)="onKeyPress($event)"
-            placeholder="Escribe tu mensaje..."
-            class="message-input"
-            maxlength="500"
-            [disabled]="isLoading">
-        
-        <button 
-            (click)="sendMessage()" 
-            [disabled]="!newMessage.trim() || isLoading"
-            class="send-button">
-            📩 Enviar
-        </button>
+            placeholder="Escribe un mensaje...">
+            <button (click)="sendMessage()" [disabled]="!newMessage.trim()">
+            Enviar
+            </button>
         </div>
-        
-        <div class="input-hint">
-        Presiona Enter para enviar • {{ newMessage.length }}/500
+
         </div>
     </div>
-</div>
+}
