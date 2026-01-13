@@ -34,7 +34,7 @@ export class ChatService {
                 .channel('public:messages')
                 .on(
                     'postgres_changes',
-                    {event: 'INSERT', schema: 'public', table: 'messages'}, (payload) => {
+                    {event: '*', schema: 'public', table: 'messages'}, (payload) => {
                         console.log('Nuevo mensaje recibido:', payload);
                         this.handleNewMessage(payload.new as ChatMessage);
                     }

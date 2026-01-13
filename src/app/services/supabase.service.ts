@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { environment } from "../../enviroments/enviroment";
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient, AuthTokenResponse, AuthError } from "@supabase/supabase-js";
 import { Router } from "@angular/router";
 import { ValidateService } from "./validate.service";
 
@@ -60,7 +60,7 @@ export class SupabaseService {
     }
 
 
-    async signIn(email: string, password: string): Promise<{ data: any; error: any }>{
+    async signIn(email: string, password: string): Promise<{ data: AuthTokenResponse['data']; error: AuthError | null }>{
         
         try {
             const { data, error} = await this.supabase.auth.signInWithPassword({
@@ -70,14 +70,14 @@ export class SupabaseService {
 
             if (error) {
                 console.error('Login failed:', error.message);
-                return { data: null, error };
+                return { data: { user: null, session: null }, error };
             }
             console.log('Login successful for:', data.user?.email);
             this.router.navigate(['/home']);
             return { data, error: null };
         } catch(error: any) {
             console.error('SignIn error:', error);
-            return { data: null, error };
+            return { data: { user: null, session: null }, error };
         }
     }
 
